@@ -43,7 +43,6 @@
        "ZG0H7aS2v_KLe5Xh2lUkSa0lkO_xP2uhQQ_69bnmF0RQiKe9vVDi7mhi0aGE"
        "do2f-iJ8JQj4EwPzZkSvdJt569w"))
 
-
 (def count-calls (atom 0))
 
 ;; Mock out the introspection endpoint. Pretend token is active if
@@ -51,20 +50,27 @@
 (defn mock-introspection
   [{:keys [form-params]}]
   (swap! count-calls inc)
-  (if (= valid-token (:token form-params))
+  (let [valid? (= valid-token (:token form-params))]
     {:status http-status/ok
-     :body (json/encode {:active true
-                         :client_id "institution_client_id"})}
-    {:status http-status/ok
-     :body {:active false}}))
+     :body   (json/encode
+               (cond-> {:active valid?}
+                       valid?
+                       (assoc :client_id "institution_client_id")))}))
+
+;; Copy client-id to body so we know the middleware works
+(defn- wrap-observe-client-id [app]
+  (fn [req]
+    (let [{:keys [client-id] :as resp} (app req)]
+      (cond-> (dissoc resp :client-id)
+              client-id (assoc :body {:client client-id})))))
 
 (defn- make-handler [introspection-endpoint basic-auth allowed-client-id-set]
   (-> (fn auth-handler [req]
-        (let [body {:client (:client-id req)}]
-          {:status http-status/ok
-           :body   body}))
+        {:status http-status/ok
+         :body   {}})
+      (authentication/wrap-authentication introspection-endpoint basic-auth {:auth-enabled true})
       (authentication/wrap-allowed-clients-checker allowed-client-id-set {:auth-enabled true})
-      (authentication/wrap-authentication introspection-endpoint basic-auth {:auth-enabled true})))
+      wrap-observe-client-id))
 
 (deftest token-validator
   ;; This binds the *dynamic* http client in clj-http.client
@@ -74,8 +80,7 @@
       (reset! count-calls 0)
       (let [handler (make-handler introspection-endpoint basic-auth #{"institution_client_id"})]
         (is (= {:status    http-status/ok
-                :body      {:client "institution_client_id"}
-                :client-id "institution_client_id"}
+                :body      {:client "institution_client_id"}}
                (handler {:headers {"authorization" (str "Bearer " valid-token)}}))
             "Ok when valid token provided")
 
@@ -92,8 +97,7 @@
 
         (reset! count-calls 0)
         (is (= {:status    http-status/ok
-                :body      {:client "institution_client_id"}
-                :client-id "institution_client_id"}
+                :body      {:client "institution_client_id"}}
                (handler {:headers {"authorization" (str "Bearer " valid-token)}}))
             "CACHED: Ok when valid token provided")
 
@@ -103,8 +107,7 @@
       (let [handler (make-handler introspection-endpoint basic-auth #{"wrong_client_id"})]
         (reset! count-calls 0)
         (is (= {:status http-status/forbidden
-                :body   "Unknown client id"
-                :client-id "institution_client_id"}
+                :body   "Unknown client id"}
                (handler {:headers {"authorization" (str "Bearer " valid-token)}}))
             "Forbidden when valid token provided but client id is unknown")
 
@@ -121,8 +124,7 @@
 
         (reset! count-calls 0)
         (is (= {:status    http-status/forbidden
-                :body      "Unknown client id"
-                :client-id "institution_client_id"}
+                :body      "Unknown client id"}
                (handler {:headers {"authorization" (str "Bearer " valid-token)}}))
             "CACHED: Forbidden when valid token provided but client id is unknown")
 

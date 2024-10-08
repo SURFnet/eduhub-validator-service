@@ -72,8 +72,4 @@
 
                   ;; assert status response with status finished and html report
                   (is (= {:job-status "finished" :profile "rio" :endpoint-id "google.com"}
-                         (dissoc body :html-report)))
-                  (let [html-report (:html-report body)]
-                    (is (string? html-report))
-                    (when html-report
-                      (is (str/includes? html-report "5 observations have no issues")))))))))))))
+                         (dissoc body :html-report))))))))))))

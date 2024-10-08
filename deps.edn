@@ -7,6 +7,7 @@
            com.nilenso/goose                           {:mvn/version "0.5.3"}
            com.taoensso/carmine                        {:mvn/version "3.4.1"}
            compojure/compojure                         {:mvn/version "1.7.1"}
+           hiccup/hiccup                               {:mvn/version "2.0.0-RC1"}
            nl.jomco/clj-http-status-codes              {:mvn/version "0.1"}
            nl.jomco/envopts                            {:mvn/version "0.0.4"}
            nl.surf/apie                                {:git/url "https://github.com/SURFnet/apie.git"

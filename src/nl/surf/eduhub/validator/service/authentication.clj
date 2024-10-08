@@ -89,15 +89,6 @@
                         token
                         auth)))
 
-(defn- handle-request-with-token [request request-handler client-id]
-  (if (nil? client-id)
-    (response/status http-status/forbidden)
-    ;; set client-id on request and response (for tracing)
-    (-> request
-        (assoc :client-id client-id)
-        request-handler
-        (assoc :client-id client-id))))
-
 (defn wrap-authentication
   "Authenticate calls to ring handler `f` using `token-authenticator`.
 
@@ -110,20 +101,26 @@
 
   If no bearer token is provided, the request is executed without a client-id."
   ; auth looks like {:user client-id :pass client-secret}
-  [f introspection-endpoint auth {:keys [auth-enabled]}]
+  [app introspection-endpoint auth {:keys [auth-enabled]}]
   (let [authenticator (memo/ttl (make-token-authenticator introspection-endpoint auth) :ttl/threshold 60000)] ; 1 minute
     (fn authentication [request]
-      (if auth-enabled
-        (if-let [token (bearer-token request)]
-          (handle-request-with-token request f (authenticator token))
-          (f request))
-        (f request)))))
+      (let [{:keys [public] :as resp} (app request)
+            token (bearer-token request)]
+        (if (or public
+                (not auth-enabled)
+                (nil? token))
+          resp
+          (if-let [client-id (authenticator token)]
+            (assoc resp :client-id client-id)
+            (response/status http-status/forbidden)))))))
 
-(defn wrap-allowed-clients-checker [f allowed-client-id-set {:keys [auth-enabled]}]
+(defn wrap-allowed-clients-checker [app allowed-client-id-set {:keys [auth-enabled]}]
   {:pre [(set? allowed-client-id-set)]}
-  (fn allowed-clients-checker [{:keys [client-id] :as request}]
-    (if (or (not auth-enabled)
-            (and client-id (allowed-client-id-set client-id)))
-      (f request)
-      {:body (if client-id "Unknown client id" "No client-id found")
-       :status http-status/forbidden})))
+  (fn allowed-clients-checker [request]
+    (let [{:keys [client-id public] :as resp} (app request)]
+      (if (or (not auth-enabled)
+              public
+              (and client-id (allowed-client-id-set client-id)))
+        resp
+        {:body   (if client-id "Unknown client id" "No client-id found")
+         :status http-status/forbidden}))))

@@ -46,6 +46,8 @@
    :job-status-expiry-seconds          ["Number of seconds before job status in Redis expires" :int
                                         :default (* 3600 24 14)
                                         :in [:expiry-seconds]]
+   :validator-service-root-url         ["Root url for the web view; does not include path" :str
+                                        :in [:root-url]]
    :ooapi-version                      ["Ooapi version to pass through to gateway" :str
                                         :in [:ooapi-version]]})
 
