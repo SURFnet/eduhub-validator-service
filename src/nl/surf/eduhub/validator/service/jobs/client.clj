@@ -26,4 +26,4 @@
               :profile            prof}]
     (status/set-status-fields redis-conn uuid "pending" {:endpoint-id endpoint-id, :profile prof} nil)
     (c/perform-async client-opts `worker/validate-endpoint endpoint-id uuid opts)
-    {:status 200 :body {:job-status "pending" :uuid uuid}}))
+    {:status 200 :body {:job-status "pending" :uuid uuid, :web-url (str "http://localhost:3002/view/status/" uuid)}}))
