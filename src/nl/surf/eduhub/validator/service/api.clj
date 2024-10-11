@@ -86,13 +86,13 @@
         (POST "/delete/report/:uuid" [uuid]
           {:action :delete-report, :public true :uuid uuid}))
       (wrap-resource "public")
-      (compojure.core/wrap-routes wrap-response-handler :load-status   (job-status-handler config))
-      (compojure.core/wrap-routes wrap-response-handler :view-report   (view-report-handler config))
-      (compojure.core/wrap-routes wrap-response-handler :delete-report (delete-report-handler config))
-      (compojure.core/wrap-routes wrap-response-handler :view-status   (view-status-handler config))
-      (compojure.core/wrap-routes wrap-response-handler :view-root     (view-root-handler config))
-      (compojure.core/wrap-routes wrap-json-response)
-      (compojure.core/wrap-routes wrap-defaults api-defaults)))
+      (wrap-response-handler :load-status   (job-status-handler config))
+      (wrap-response-handler :view-report   (view-report-handler config))
+      (wrap-response-handler :delete-report (delete-report-handler config))
+      (wrap-response-handler :view-status   (view-status-handler config))
+      (wrap-response-handler :view-root     (view-root-handler config))
+      (wrap-json-response)
+      (wrap-defaults api-defaults)))
 
 (defn private-routes [{:keys [introspection-endpoint-url introspection-basic-auth allowed-client-ids] :as config} auth-enabled]
   (let [allowed-client-id-set (set (str/split allowed-client-ids #","))
@@ -102,12 +102,12 @@
             {:action :checker, :endpoint-id endpoint-id})
           (POST "/endpoints/:endpoint-id/paths" [endpoint-id profile]
             {:action :validator, :endpoint-id endpoint-id :profile profile}))
-        (compojure.core/wrap-routes auth/wrap-authentication introspection-endpoint-url introspection-basic-auth auth-opts)
-        (compojure.core/wrap-routes auth/wrap-allowed-clients-checker allowed-client-id-set auth-opts)
-        (compojure.core/wrap-routes wrap-response-handler :checker #(checker/check-endpoint (:endpoint-id %) config))
-        (compojure.core/wrap-routes wrap-response-handler :validator #(jobs-client/enqueue-validation (:endpoint-id %) (:profile %) config))
-        (compojure.core/wrap-routes wrap-json-response)
-        (compojure.core/wrap-routes wrap-defaults api-defaults))))
+        (auth/wrap-authentication introspection-endpoint-url introspection-basic-auth auth-opts)
+        (auth/wrap-allowed-clients-checker allowed-client-id-set auth-opts)
+        (wrap-response-handler :checker #(checker/check-endpoint (:endpoint-id %) config))
+        (wrap-response-handler :validator #(jobs-client/enqueue-validation (:endpoint-id %) (:profile %) config))
+        (wrap-json-response)
+        (wrap-defaults api-defaults))))
 
 ;; Compose the app from the routes and the wrappers. Authentication can be disabled for testing purposes.
 (defn compose-app [config auth-enabled]
