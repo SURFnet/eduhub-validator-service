@@ -35,43 +35,45 @@
 ;; `activate-handler?` is a function that takes a request and returns a boolean which determines if
 ;; the current handler should be activated (or skipped).
 ;; `response-handler` takes an intermediate response and processes it into the next step.
-(defn wrap-response-handler [app action response-handler]
+(defn wrap-response-handler [app action response-handler config]
   (fn [req]
     (let [resp (app req)]
       (if (= action (:action resp))
-        (response-handler (dissoc resp :action))
+        (response-handler (dissoc resp :action) config)
         resp))))
 
 ;; Turn the contents of a job status (stored in redis) into an http response.
-(defn- job-status-handler [{:keys [redis-conn] :as _config}]
-  (fn handle-job-status [resp]
-    (let [job-status (status/load-status redis-conn (:uuid resp))]
-      (if (empty? job-status)
-        {:status http-status/not-found}
-        {:status http-status/ok :body (dissoc job-status :html-report)}))))
+(defn- job-status-handler [resp {:keys [redis-conn] :as _config}]
+  (let [job-status (status/load-status redis-conn (:uuid resp))]
+    (if (empty? job-status)
+      {:status http-status/not-found}
+      {:status http-status/ok :body (dissoc job-status :html-report)})))
 
-(defn- view-report-handler [{:keys [redis-conn] :as _config}]
-  (fn view-status [{:keys [uuid] :as _resp}]
-    (let [validation (status/load-status redis-conn uuid)]
-      (if (= "finished" (:job-status validation))
-        {:status http-status/ok :body (:html-report validation) :headers {"Content-Type" "text/html; charset=UTF-8"}}
-        {:status http-status/not-found :body ""}))))
+(defn- view-report-handler [{:keys [uuid] :as _resp} {:keys [redis-conn] :as _config}]
+  (let [validation (status/load-status redis-conn uuid)]
+    (if (= "finished" (:job-status validation))
+      {:status http-status/ok :body (:html-report validation)}
+      {:status http-status/see-other :headers {"Location" "/?not-found=true"}})))
 
-(defn- delete-report-handler [{:keys [redis-conn] :as _config}]
-  (fn delete-report [{:keys [uuid] :as _resp}]
-    (status/delete-status redis-conn uuid)
-    {:status http-status/see-other :headers {"Location" "/" "Content-Type" "text/html; charset=UTF-8"}}))
+(defn- delete-report-handler [{:keys [uuid] :as _resp} {:keys [redis-conn] :as _config}]
+  (status/delete-status redis-conn uuid)
+  {:status http-status/see-other :headers {"Location" "/"}})
 
-(defn- view-root-handler [config]
-  (fn view-status [{:keys [not-found] :as _resp}]
-    {:status http-status/ok :body (views.root/render not-found config) :headers {"Content-Type" "text/html; charset=UTF-8"}}))
+(defn- view-root-handler [{:keys [not-found] :as _resp} config]
+  {:status http-status/ok :body (views.root/render not-found config)})
 
-(defn- view-status-handler [{:keys [redis-conn] :as config}]
-  (fn view-status [{:keys [uuid] :as _resp}]
-    (let [validation (status/load-status redis-conn uuid)]
-      (if validation
-        {:status http-status/ok :body (views.status/render (assoc validation :uuid uuid) config) :headers {"Content-Type" "text/html; charset=UTF-8"}}
-        {:status http-status/see-other :headers {"Location" "/?not-found=true" "Content-Type" "text/html; charset=UTF-8"}}))))
+(defn- view-status-handler [{:keys [uuid] :as _resp} {:keys [redis-conn] :as config}]
+  (let [validation (status/load-status redis-conn uuid)]
+    (if validation
+      {:status http-status/ok :body (views.status/render (assoc validation :uuid uuid) config)}
+      {:status http-status/see-other :headers {"Location" "/?not-found=true"}})))
+
+(defn wrap-html-response [app]
+  (fn html-response [req]
+    (let [resp (app req)]
+      (if (string? (:body resp))
+        (assoc-in resp [:headers "Content-Type"] "text/html; charset=UTF-8")
+        resp))))
 
 (defn public-routes [config]
   (-> (compojure.core/routes
@@ -86,11 +88,12 @@
         (POST "/delete/report/:uuid" [uuid]
           {:action :delete-report, :public true :uuid uuid}))
       (wrap-resource "public")
-      (wrap-response-handler :load-status   (job-status-handler config))
-      (wrap-response-handler :view-report   (view-report-handler config))
-      (wrap-response-handler :delete-report (delete-report-handler config))
-      (wrap-response-handler :view-status   (view-status-handler config))
-      (wrap-response-handler :view-root     (view-root-handler config))
+      (wrap-response-handler :load-status job-status-handler config)
+      (wrap-response-handler :view-report view-report-handler config)
+      (wrap-response-handler :delete-report delete-report-handler config)
+      (wrap-response-handler :view-status view-status-handler config)
+      (wrap-response-handler :view-root view-root-handler config)
+      (wrap-html-response)
       (wrap-json-response)
       (wrap-defaults api-defaults)))
 
@@ -104,8 +107,9 @@
             {:action :validator, :endpoint-id endpoint-id :profile profile}))
         (auth/wrap-authentication introspection-endpoint-url introspection-basic-auth auth-opts)
         (auth/wrap-allowed-clients-checker allowed-client-id-set auth-opts)
-        (wrap-response-handler :checker #(checker/check-endpoint (:endpoint-id %) config))
-        (wrap-response-handler :validator #(jobs-client/enqueue-validation (:endpoint-id %) (:profile %) config))
+        (wrap-response-handler :checker checker/check-endpoint config)
+        (wrap-response-handler :validator jobs-client/enqueue-validation config)
+        (wrap-html-response)
         (wrap-json-response)
         (wrap-defaults api-defaults))))
 

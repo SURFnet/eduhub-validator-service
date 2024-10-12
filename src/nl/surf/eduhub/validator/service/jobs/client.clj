@@ -16,7 +16,7 @@
 
 ;; Enqueue the validate-endpoint call in the worker queue.
 (defn enqueue-validation
-  [endpoint-id profile {:keys [redis-conn gateway-basic-auth gateway-url ooapi-version max-total-requests] :as _config}]
+  [{:keys [endpoint-id profile] :as _resp} {:keys [redis-conn gateway-basic-auth gateway-url ooapi-version max-total-requests] :as _config}]
   (let [uuid (str (UUID/randomUUID))
         prof (or profile "rio")
         opts {:basic-auth         gateway-basic-auth
