@@ -65,7 +65,7 @@
               client-id (assoc :body {:client client-id})))))
 
 (defn- make-handler [introspection-endpoint basic-auth allowed-client-id-set]
-  (-> (fn auth-handler [req]
+  (-> (fn auth-handler [_req]
         {:status http-status/ok
          :body   {}})
       (authentication/wrap-authentication introspection-endpoint basic-auth {:auth-enabled true})

@@ -1,7 +1,6 @@
 (ns nl.surf.eduhub.validator.service.jobs.client-test
   (:require [babashka.http-client :as http]
             [babashka.json :as json]
-            [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
             [environ.core :refer [env]]
             [goose.client :as c]
