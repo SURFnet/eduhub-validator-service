@@ -25,7 +25,6 @@
             [nl.surf.eduhub.validator.service.checker :as checker]
             [nl.surf.eduhub.validator.service.jobs.client :as jobs-client]
             [nl.surf.eduhub.validator.service.jobs.status :as status]
-            [nl.surf.eduhub.validator.service.views.root :as views.root]
             [nl.surf.eduhub.validator.service.views.status :as views.status]
             [ring.middleware.defaults :refer [api-defaults wrap-defaults]]
             [ring.middleware.json :refer [wrap-json-response]]
@@ -49,40 +48,45 @@
       {:status http-status/not-found}
       {:status http-status/ok :body (dissoc job-status :html-report)})))
 
-(defn- view-report-handler [{:keys [uuid] :as _resp} {:keys [redis-conn] :as _config}]
+(defn- view-report-handler [{:keys [uuid download] :as _resp} {:keys [redis-conn] :as _config}]
   (let [validation (status/load-status redis-conn uuid)]
     (if (= "finished" (:job-status validation))
-      {:status http-status/ok :body (:html-report validation)}
-      {:status http-status/see-other :headers {"Location" "/?not-found=true"}})))
+      {:status http-status/ok :body (:html-report validation) :download download}
+      {:status http-status/see-other :headers {"Location" (str "/view/status/" uuid)}})))
 
 (defn- delete-report-handler [{:keys [uuid] :as _resp} {:keys [redis-conn] :as _config}]
   (status/delete-status redis-conn uuid)
-  {:status http-status/see-other :headers {"Location" "/"}})
-
-(defn- view-root-handler [{:keys [not-found] :as _resp} config]
-  {:status http-status/ok :body (views.root/render not-found config)})
+  {:status http-status/see-other :headers {"Location" (str "/view/status/" uuid)}})
 
 (defn- view-status-handler [{:keys [uuid] :as _resp} {:keys [redis-conn] :as config}]
   (let [validation (status/load-status redis-conn uuid)]
     (if validation
       {:status http-status/ok :body (views.status/render (assoc validation :uuid uuid) config)}
-      {:status http-status/see-other :headers {"Location" "/?not-found=true"}})))
+      {:status http-status/not-found :body (views.status/render-not-found)})))
 
 (defn wrap-html-response [app]
   (fn html-response [req]
     (let [resp (app req)]
-      (if (string? (:body resp))
+      (cond
+        (and (string? (:body resp))
+             (:download resp))
+        (update-in resp [:headers] merge
+                   {"Content-Type" "text/html; charset=UTF-8"
+                    "Content-Disposition" "attachment; filename=\"validation-report.html\""})
+
+        (string? (:body resp))
         (assoc-in resp [:headers "Content-Type"] "text/html; charset=UTF-8")
-        resp))))
+
+        :else resp))))
 
 (defn public-routes [config]
   (-> (compojure.core/routes
-        (GET "/" [not-found]
-          {:action :view-root, :public true, :not-found (= "true" not-found)})
         (GET "/status/:uuid" [uuid]
           {:action :load-status, :uuid uuid})
         (GET "/view/report/:uuid" [uuid]
           {:action :view-report, :public true :uuid uuid})
+        (GET "/download/report/:uuid" [uuid]
+          {:action :view-report, :public true :uuid uuid :download true})
         (GET "/view/status/:uuid" [uuid]
           {:action :view-status, :public true :uuid uuid})
         (POST "/delete/report/:uuid" [uuid]
@@ -92,7 +96,6 @@
       (wrap-response-handler :view-report view-report-handler config)
       (wrap-response-handler :delete-report delete-report-handler config)
       (wrap-response-handler :view-status view-status-handler config)
-      (wrap-response-handler :view-root view-root-handler config)
       (wrap-html-response)
       (wrap-json-response)
       (wrap-defaults api-defaults)))
