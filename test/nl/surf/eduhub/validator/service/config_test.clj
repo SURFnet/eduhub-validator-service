@@ -32,7 +32,8 @@
                   :surf-conext-client-secret "default",
                   :surf-conext-introspection-endpoint "default"
                   :server-port "3002"
-                  :validator-service-root-url "http://localhost:3002"})
+                  :validator-service-root-url "http://localhost:3002"
+                  :spider-timeout-millis "3600000"})
 
 (def default-expected-value {:allowed-client-ids "default",
                              :gateway-url "https://gateway.test.surfeduhub.nl/",
@@ -44,7 +45,8 @@
                              :server-port 3002
                              :redis-conn {:spec {:uri "redis://localhost"}}
                              :expiry-seconds 1209600
-                             :root-url "http://localhost:3002"})
+                             :root-url "http://localhost:3002"
+                             :spider-timeout-millis 3600000})
 
 (defn- test-env [env]
   (-> default-env
