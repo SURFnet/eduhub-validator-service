@@ -29,6 +29,7 @@ MAX_TOTAL_REQUESTS                  Maximum number of requests that validator is
 OOAPI_VERSION                       Ooapi version to pass through to gateway
 SERVER_PORT                         Starts the app server on this port
 JOB_STATUS_EXPIRY_SECONDS           Number of seconds before job status in Redis expires
+SPIDER_TIMEOUT_MILLIS               Maximum number of milliseconds before spider timeout.
 ```
 
 ## Build

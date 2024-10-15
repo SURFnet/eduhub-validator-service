@@ -39,7 +39,7 @@
 ;; Returns the generated HTML report.
 (defn validate-endpoint
   "Returns the HTML validation report as a String."
-  [endpoint-id {:keys [basic-auth ooapi-version max-total-requests base-url profile] :as opts}]
+  [endpoint-id {:keys [basic-auth ooapi-version max-total-requests base-url profile spider-timeout-millis] :as opts}]
   {:pre [endpoint-id basic-auth ooapi-version base-url profile]}
   (let [report-file       (File/createTempFile "report" ".html")
         report-path       (.getAbsolutePath report-file)
@@ -54,6 +54,7 @@
                             :x-envelope-response "false"},
                   :no-spider? false,
                   :max-requests-per-operation ##Inf,
+                  :spider-timeout-millis spider-timeout-millis,
                   :observations-path observations-path,
                   :profile profile}]
     (try
