@@ -19,8 +19,10 @@
 (ns nl.surf.eduhub.validator.service.validate
   (:gen-class)
   (:require [babashka.http-client :as http]
+            [clojure.tools.logging :as log]
             [nl.jomco.apie.main :as apie])
-  (:import [java.io File]))
+  (:import [clojure.lang ExceptionInfo]
+           [java.io File]))
 
 ;; Validates whether the endpoint is working and reachable at all.
 (defn check-endpoint
@@ -60,6 +62,10 @@
     (try
       (apie/main (merge defaults opts))
       (slurp report-path)
+      (catch ExceptionInfo ex
+        (when-let [dr (:during-request (ex-data ex))]
+          (log/error ex (str "Timeout during request " (prn-str dr))))
+        (throw ex))
       (finally
         (.delete observations-file)
         (.delete report-file)))))
