@@ -11,8 +11,7 @@
            nl.jomco/clj-http-status-codes              {:mvn/version "0.1"}
            nl.jomco/envopts                            {:mvn/version "0.0.4"}
            nl.surf/apie                                {:git/url "https://github.com/SURFnet/apie.git"
-                                                        :git/tag "v0.2.1"
-                                                        :git/sha "d1326bc79884351315c8220e1f71bfc94dee4433"}
+                                                        :git/sha "4f912f114d29e3edf61b4b331416fa2b90cbeaa6"}
            nl.surfnet/eduhub-validator                 {:git/url "https://github.com/SURFnet/eduhub-validator"
                                                         :git/sha "fe0b456e42abe218fe375b1a5f183bee46a6e222"
                                                         :git/branch "main"}
