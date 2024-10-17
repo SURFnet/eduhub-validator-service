@@ -27,7 +27,7 @@
   (let [ts (k m)]
     (is (string? ts) (str k " value must be set in " (prn-str m)))
     (when (string? ts)
-      (is (re-matches #"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z" ts))))
+      (is (re-matches #"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z" ts)))) ; fractional seconds are omitted when zero
   (dissoc m k))
 
 (defn make-playbacker [dir]

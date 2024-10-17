@@ -19,8 +19,10 @@
 (ns nl.surf.eduhub.validator.service.validate
   (:gen-class)
   (:require [babashka.http-client :as http]
+            [clojure.tools.logging :as log]
             [nl.jomco.apie.main :as apie])
-  (:import [java.io File]))
+  (:import [clojure.lang ExceptionInfo]
+           [java.io File]))
 
 ;; Validates whether the endpoint is working and reachable at all.
 (defn check-endpoint
@@ -39,7 +41,7 @@
 ;; Returns the generated HTML report.
 (defn validate-endpoint
   "Returns the HTML validation report as a String."
-  [endpoint-id {:keys [basic-auth ooapi-version max-total-requests base-url profile] :as opts}]
+  [endpoint-id {:keys [basic-auth ooapi-version max-total-requests base-url profile spider-timeout-millis] :as opts}]
   {:pre [endpoint-id basic-auth ooapi-version base-url profile]}
   (let [report-file       (File/createTempFile "report" ".html")
         report-path       (.getAbsolutePath report-file)
@@ -54,11 +56,16 @@
                             :x-envelope-response "false"},
                   :no-spider? false,
                   :max-requests-per-operation ##Inf,
+                  :spider-timeout-millis spider-timeout-millis,
                   :observations-path observations-path,
                   :profile profile}]
     (try
       (apie/main (merge defaults opts))
       (slurp report-path)
+      (catch ExceptionInfo ex
+        (when-let [dr (:during-request (ex-data ex))]
+          (log/error ex (str "Timeout during request " (prn-str dr))))
+        (throw ex))
       (finally
         (.delete observations-file)
         (.delete report-file)))))
