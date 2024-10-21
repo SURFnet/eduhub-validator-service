@@ -5,16 +5,9 @@
             [nl.surf.eduhub.validator.service.validate :as validate]))
 
 (defn- handle-check-endpoint-response [status body endpoint-id]
-  (condp = status
-    ;; If the validator doesn't have the right credentials for the gateway, manifested by a 401 response,
-    ;; we'll return a 502 error and log it.
-    http-status/unauthorized
-    {:status http-status/bad-gateway :body {:valid   false
-                                            :message "Incorrect credentials for gateway"}}
-
+  (if (= http-status/ok status)
     ;; If the gateway returns OK we assume we've gotten a json envelope response and check the response status
     ;; of the endpoint.
-    http-status/ok
     (let [envelope        (json/read-str body)
           envelope-status (get-in envelope [:gateway :endpoints (keyword endpoint-id) :responseCode])]
       {:status http-status/ok
@@ -25,12 +18,11 @@
                  {:valid false
                   :message (str "Endpoint validation failed with status: " envelope-status)})})
 
-    ;; If the gateway returns something else than a 200 or a 401, treat it similar to an error
+    ;; If the gateway returns something else than a 200, treat it similar to an error
     (let [error-msg (str "Unexpected response status received from gateway: " status)]
       (log/error error-msg)
       {:status http-status/internal-server-error
-       :body   {:valid   false
-                :message error-msg}})))
+       :body   {}})))
 
 ;; The endpoint checker from phase 1. This connects to an endpoint via the gateway and checks if it receives
 ;; a valid response.
@@ -43,5 +35,4 @@
     (catch Throwable e
       (log/error e "Internal error in validator-service")
       {:status http-status/internal-server-error
-       :body   {:valid false
-                :message "Internal error in validator-service"}})))
+       :body   {}})))
