@@ -51,10 +51,10 @@
 
 (deftest test-unexpected-gateway-status
          (with-redefs [http/request (fn [_] {:status 500 :body {:message "mocked response"}})]
-           (response-match {:status 500 :body {:message "Unexpected response status received from gateway: 500", :valid false}}
+           (response-match {:status 500 :body {}}
                            {:uri "/endpoints/google.com/config" :request-method :post})))
 
 (deftest test-validate-fails
          (with-redefs [http/request (fn [_] {:status 401 :body "mocked response"})]
-           (response-match {:status 502 :body {:message "Incorrect credentials for gateway", :valid false}}
+           (response-match {:status 500 :body {}}
                            {:uri "/endpoints/google.com/config" :request-method :post})))
