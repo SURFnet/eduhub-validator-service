@@ -26,7 +26,7 @@
 
 ;; The endpoint checker from phase 1. This connects to an endpoint via the gateway and checks if it receives
 ;; a valid response.
-(defn check-endpoint [endpoint-id config]
+(defn check-endpoint [{:keys [endpoint-id] :as _resp} config]
   (try
     (let [{:keys [status body]} (validate/check-endpoint endpoint-id config)]
       ;; If the client credentials for the validator are incorrect, the wrap-allowed-clients-checker

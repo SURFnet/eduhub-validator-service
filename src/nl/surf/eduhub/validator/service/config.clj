@@ -46,12 +46,17 @@
    :job-status-expiry-seconds          ["Number of seconds before job status in Redis expires" :int
                                         :default (* 3600 24 14)
                                         :in [:expiry-seconds]]
+   :validator-service-root-url         ["Root url for the web view; does not include path" :str
+                                        :in [:root-url]]
    :ooapi-version                      ["Ooapi version to pass through to gateway" :str
-                                        :in [:ooapi-version]]})
+                                        :in [:ooapi-version]]
+   :spider-timeout-millis              ["Maximum number of milliseconds before spider timeout." :int
+                                        :default 3600000
+                                        :in [:spider-timeout-millis]]})
 
 (defn- file-secret-loader-reducer [env-map value-key]
   (let [file-key (keyword (str (name value-key) "-file"))
-        path (file-key env-map)]
+        path     (file-key env-map)]
     (cond
       (nil? path)
       env-map
