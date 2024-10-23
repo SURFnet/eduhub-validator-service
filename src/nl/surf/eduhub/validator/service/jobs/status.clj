@@ -25,10 +25,7 @@
 (defn load-status [redis-conn uuid]
   (let [result (car/wcar redis-conn (car/hgetall (status-key uuid)))]
     (when-not (empty? result)
-      (let [m (into {} (apply hash-map result))
-            m (into {} (for [[k v] m] [(keyword k) v]))]
-        (assert (every? keyword? (keys m)))
-        m))))
+      (update-keys (apply hash-map result) keyword))))
 
 (defn delete-status [redis-conn uuid]
   (car/wcar redis-conn (car/del (status-key uuid))))
