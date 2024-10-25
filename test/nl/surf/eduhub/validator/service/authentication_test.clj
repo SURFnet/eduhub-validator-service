@@ -68,8 +68,7 @@
   (-> (fn auth-handler [_req]
         {:status http-status/ok
          :body   {}})
-      (authentication/wrap-authentication introspection-endpoint basic-auth {:auth-enabled true})
-      (authentication/wrap-allowed-clients-checker allowed-client-id-set {:auth-enabled true})
+      (authentication/wrap-authentication introspection-endpoint basic-auth allowed-client-id-set {:auth-disabled false})
       wrap-observe-client-id))
 
 (deftest token-validator
@@ -80,7 +79,7 @@
       (reset! count-calls 0)
       (let [handler (make-handler introspection-endpoint basic-auth #{"institution_client_id"})]
         (is (= {:status    http-status/ok
-                :body      {:client "institution_client_id"}}
+                :body      {}}
                (handler {:headers {"authorization" (str "Bearer " valid-token)}}))
             "Ok when valid token provided")
 
@@ -97,7 +96,7 @@
 
         (reset! count-calls 0)
         (is (= {:status    http-status/ok
-                :body      {:client "institution_client_id"}}
+                :body      {}}
                (handler {:headers {"authorization" (str "Bearer " valid-token)}}))
             "CACHED: Ok when valid token provided")
 

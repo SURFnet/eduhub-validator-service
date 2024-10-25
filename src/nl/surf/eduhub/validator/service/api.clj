@@ -96,9 +96,9 @@
       (wrap-json-response)
       (wrap-defaults api-defaults)))
 
-(defn private-routes [{:keys [introspection-endpoint-url introspection-basic-auth allowed-client-ids] :as config} auth-enabled]
+(defn private-routes [{:keys [introspection-endpoint-url introspection-basic-auth allowed-client-ids] :as config} auth-disabled]
   (let [allowed-client-id-set (set (str/split allowed-client-ids #","))
-        auth-opts             {:auth-enabled (boolean auth-enabled)}]
+        auth-opts             {:auth-disabled (boolean auth-disabled)}]
     (-> (compojure.core/routes
           (POST "/endpoints/:endpoint-id/config" [endpoint-id]
             (checker/check-endpoint endpoint-id config))
@@ -109,8 +109,8 @@
         (wrap-defaults api-defaults))))
 
 ;; Compose the app from the routes and the wrappers. Authentication can be disabled for testing purposes.
-(defn compose-app [config auth-enabled]
+(defn compose-app [config auth-disabled]
   (compojure.core/routes
     (public-routes config)
-    (private-routes config auth-enabled)
+    (private-routes config auth-disabled)
     (route/not-found "Not Found")))

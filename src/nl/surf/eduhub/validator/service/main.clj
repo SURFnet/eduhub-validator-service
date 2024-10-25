@@ -47,4 +47,4 @@
                                (let [job-args (assoc-in (vec (:args job)) [2 :config] config)
                                      new-job (assoc job :args job-args)]
                                  (app opts new-job))))))
-    (start-server (api/compose-app config :auth-enabled) config)))
+    (start-server (api/compose-app config (not :auth-disabled)) config)))

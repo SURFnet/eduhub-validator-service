@@ -13,7 +13,7 @@
 (def test-config
   (first (config/load-config-from-env (merge config-test/default-env env))))
 
-(def app (api/compose-app test-config false))
+(def app (api/compose-app test-config :auth-disabled))
 
 (defn- make-status-call [uuid]
   (let [{:keys [status body]}

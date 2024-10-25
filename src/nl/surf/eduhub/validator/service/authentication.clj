@@ -40,8 +40,7 @@
             [cheshire.core :as json]
             [clojure.core.memoize :as memo]
             [clojure.tools.logging :as log]
-            [nl.jomco.http-status-codes :as http-status]
-            [ring.util.response :as response]))
+            [nl.jomco.http-status-codes :as http-status]))
 
 (defn bearer-token
   [{{:strs [authorization]} :headers}]
@@ -101,15 +100,12 @@
 
   If no bearer token is provided, the request is executed without a client-id."
   ; auth looks like {:user client-id :pass client-secret}
-  [app introspection-endpoint auth allowed-client-id-set {:keys [auth-enabled]}]
+  [app introspection-endpoint auth allowed-client-id-set {:keys [auth-disabled]}]
   (let [authenticator (memo/ttl (make-token-authenticator introspection-endpoint auth) :ttl/threshold 60000)] ; 1 minute
     (fn authentication [request]
-      (if (not auth-enabled)
-        (app request)
-        (let [token (bearer-token request)
-              client-id (some-> (bearer-token request)
-                                (and token (authenticator token)))]
-          (if (allowed-client-id-set client-id)
-            (app request)
-            {:body   (if client-id "Unknown client id" "No client-id found")
-             :status http-status/forbidden}))))))
+      (let [client-id (some-> request bearer-token authenticator)]
+        (if (or auth-disabled
+                (allowed-client-id-set client-id))
+          (app request)
+          {:body   (if client-id "Unknown client id" "No client-id found")
+           :status http-status/forbidden})))))
