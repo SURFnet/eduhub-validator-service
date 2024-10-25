@@ -42,23 +42,23 @@
         resp))))
 
 ;; Turn the contents of a job status (stored in redis) into an http response.
-(defn- job-status-handler [resp {:keys [redis-conn] :as _config}]
-  (let [job-status (status/load-status redis-conn (:uuid resp))]
+(defn- job-status-handler [uuid {:keys [redis-conn] :as _config}]
+  (let [job-status (status/load-status redis-conn uuid)]
     (if (empty? job-status)
       {:status http-status/not-found}
       {:status http-status/ok :body (dissoc job-status :html-report)})))
 
-(defn- view-report-handler [{:keys [uuid download] :as _resp} {:keys [redis-conn] :as _config}]
+(defn- view-report-handler [uuid {:keys [redis-conn] :as _config} {:keys [download]}]
   (let [validation (status/load-status redis-conn uuid)]
     (if (= "finished" (:job-status validation))
       {:status http-status/ok :body (:html-report validation) :download download}
       {:status http-status/see-other :headers {"Location" (str "/view/status/" uuid)}})))
 
-(defn- delete-report-handler [{:keys [uuid] :as _resp} {:keys [redis-conn] :as _config}]
+(defn- delete-report-handler [uuid {:keys [redis-conn] :as _config}]
   (status/delete-status redis-conn uuid)
   {:status http-status/see-other :headers {"Location" (str "/view/status/" uuid)}})
 
-(defn- view-status-handler [{:keys [uuid] :as _resp} {:keys [redis-conn] :as config}]
+(defn- view-status-handler [uuid {:keys [redis-conn] :as config}]
   (let [validation (status/load-status redis-conn uuid)]
     (if validation
       {:status http-status/ok :body (views.status/render (assoc validation :uuid uuid) config)}
@@ -82,20 +82,16 @@
 (defn public-routes [config]
   (-> (compojure.core/routes
         (GET "/status/:uuid" [uuid]
-          {:action :load-status, :uuid uuid})
+          (job-status-handler uuid config))
         (GET "/view/report/:uuid" [uuid]
-          {:action :view-report, :public true :uuid uuid})
+          (view-report-handler uuid config {:download false}))
         (GET "/download/report/:uuid" [uuid]
-          {:action :view-report, :public true :uuid uuid :download true})
+          (view-report-handler uuid config {:download true}))
         (GET "/view/status/:uuid" [uuid]
-          {:action :view-status, :public true :uuid uuid})
+          (view-status-handler uuid config))
         (POST "/delete/report/:uuid" [uuid]
-          {:action :delete-report, :public true :uuid uuid}))
+          (delete-report-handler uuid config)))
       (wrap-resource "public")
-      (wrap-response-handler :load-status job-status-handler config)
-      (wrap-response-handler :view-report view-report-handler config)
-      (wrap-response-handler :delete-report delete-report-handler config)
-      (wrap-response-handler :view-status view-status-handler config)
       (wrap-html-response)
       (wrap-json-response)
       (wrap-defaults api-defaults)))
@@ -105,14 +101,10 @@
         auth-opts             {:auth-enabled (boolean auth-enabled)}]
     (-> (compojure.core/routes
           (POST "/endpoints/:endpoint-id/config" [endpoint-id]
-            {:action :checker, :endpoint-id endpoint-id})
+            (checker/check-endpoint endpoint-id config))
           (POST "/endpoints/:endpoint-id/paths" [endpoint-id profile]
-            {:action :validator, :endpoint-id endpoint-id :profile profile}))
-        (auth/wrap-authentication introspection-endpoint-url introspection-basic-auth auth-opts)
-        (auth/wrap-allowed-clients-checker allowed-client-id-set auth-opts)
-        (wrap-response-handler :checker checker/check-endpoint config)
-        (wrap-response-handler :validator jobs-client/enqueue-validation config)
-        (wrap-html-response)
+            (jobs-client/enqueue-validation endpoint-id profile config)))
+        (auth/wrap-authentication introspection-endpoint-url introspection-basic-auth allowed-client-id-set auth-opts)
         (wrap-json-response)
         (wrap-defaults api-defaults))))
 

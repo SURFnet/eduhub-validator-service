@@ -101,26 +101,15 @@
 
   If no bearer token is provided, the request is executed without a client-id."
   ; auth looks like {:user client-id :pass client-secret}
-  [app introspection-endpoint auth {:keys [auth-enabled]}]
+  [app introspection-endpoint auth allowed-client-id-set {:keys [auth-enabled]}]
   (let [authenticator (memo/ttl (make-token-authenticator introspection-endpoint auth) :ttl/threshold 60000)] ; 1 minute
     (fn authentication [request]
-      (let [{:keys [public] :as resp} (app request)
-            token (bearer-token request)]
-        (if (or public
-                (not auth-enabled)
-                (nil? token))
-          resp
-          (if-let [client-id (authenticator token)]
-            (assoc resp :client-id client-id)
-            (response/status http-status/forbidden)))))))
-
-(defn wrap-allowed-clients-checker [app allowed-client-id-set {:keys [auth-enabled]}]
-  {:pre [(set? allowed-client-id-set)]}
-  (fn allowed-clients-checker [request]
-    (let [{:keys [client-id public] :as resp} (app request)]
-      (if (or (not auth-enabled)
-              public
-              (and client-id (allowed-client-id-set client-id)))
-        resp
-        {:body   (if client-id "Unknown client id" "No client-id found")
-         :status http-status/forbidden}))))
+      (if (not auth-enabled)
+        (app request)
+        (let [token (bearer-token request)
+              client-id (some-> (bearer-token request)
+                                (and token (authenticator token)))]
+          (if (allowed-client-id-set client-id)
+            (app request)
+            {:body   (if client-id "Unknown client id" "No client-id found")
+             :status http-status/forbidden}))))))
