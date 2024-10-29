@@ -28,6 +28,7 @@ ALLOWED_CLIENT_IDS                  Comma separated list of allowed SurfCONEXT c
 MAX_TOTAL_REQUESTS                  Maximum number of requests that validator is allowed to make before raising an error
 OOAPI_VERSION                       Ooapi version to pass through to gateway
 SERVER_PORT                         Starts the app server on this port
+REDIS_URI                           URI to redis
 JOB_STATUS_EXPIRY_SECONDS           Number of seconds before job status in Redis expires
 ```
 
