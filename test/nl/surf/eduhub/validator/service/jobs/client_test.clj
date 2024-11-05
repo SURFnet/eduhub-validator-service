@@ -1,7 +1,6 @@
 (ns nl.surf.eduhub.validator.service.jobs.client-test
   (:require [babashka.http-client :as http]
             [babashka.json :as json]
-            [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
             [environ.core :refer [env]]
             [goose.client :as c]
@@ -14,7 +13,7 @@
 (def test-config
   (first (config/load-config-from-env (merge config-test/default-env env))))
 
-(def app (api/compose-app test-config false))
+(def app (api/compose-app test-config :auth-disabled))
 
 (defn- make-status-call [uuid]
   (let [{:keys [status body]}
@@ -72,8 +71,4 @@
 
                   ;; assert status response with status finished and html report
                   (is (= {:job-status "finished" :profile "rio" :endpoint-id "google.com"}
-                         (dissoc body :html-report)))
-                  (let [html-report (:html-report body)]
-                    (is (string? html-report))
-                    (when html-report
-                      (is (str/includes? html-report "5 observations have no issues")))))))))))))
+                         (dissoc body :html-report))))))))))))

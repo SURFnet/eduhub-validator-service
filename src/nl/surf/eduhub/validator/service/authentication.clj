@@ -40,8 +40,7 @@
             [cheshire.core :as json]
             [clojure.core.memoize :as memo]
             [clojure.tools.logging :as log]
-            [nl.jomco.http-status-codes :as http-status]
-            [ring.util.response :as response]))
+            [nl.jomco.http-status-codes :as http-status]))
 
 (defn bearer-token
   [{{:strs [authorization]} :headers}]
@@ -89,15 +88,6 @@
                         token
                         auth)))
 
-(defn- handle-request-with-token [request request-handler client-id]
-  (if (nil? client-id)
-    (response/status http-status/forbidden)
-    ;; set client-id on request and response (for tracing)
-    (-> request
-        (assoc :client-id client-id)
-        request-handler
-        (assoc :client-id client-id))))
-
 (defn wrap-authentication
   "Authenticate calls to ring handler `f` using `token-authenticator`.
 
@@ -110,20 +100,12 @@
 
   If no bearer token is provided, the request is executed without a client-id."
   ; auth looks like {:user client-id :pass client-secret}
-  [f introspection-endpoint auth {:keys [auth-enabled]}]
+  [app introspection-endpoint auth allowed-client-id-set {:keys [auth-disabled]}]
   (let [authenticator (memo/ttl (make-token-authenticator introspection-endpoint auth) :ttl/threshold 60000)] ; 1 minute
     (fn authentication [request]
-      (if auth-enabled
-        (if-let [token (bearer-token request)]
-          (handle-request-with-token request f (authenticator token))
-          (f request))
-        (f request)))))
-
-(defn wrap-allowed-clients-checker [f allowed-client-id-set {:keys [auth-enabled]}]
-  {:pre [(set? allowed-client-id-set)]}
-  (fn allowed-clients-checker [{:keys [client-id] :as request}]
-    (if (or (not auth-enabled)
-            (and client-id (allowed-client-id-set client-id)))
-      (f request)
-      {:body (if client-id "Unknown client id" "No client-id found")
-       :status http-status/forbidden})))
+      (let [client-id (some-> request bearer-token authenticator)]
+        (if (or auth-disabled
+                (allowed-client-id-set client-id))
+          (app request)
+          {:body   (if client-id "Unknown client id" "No client-id found")
+           :status http-status/forbidden})))))

@@ -27,7 +27,9 @@
 
 ;; Starts a Jetty server on given port.
 (defn start-server [routes {:keys [server-port] :as _config}]
-  (let [server (run-jetty routes {:port server-port :join? false})
+  (let [server  (-> routes
+
+                    (run-jetty {:port server-port :join? false}))
         handler ^Runnable (fn [] (.stop server))]
     ;; Add a shutdown hook to stop Jetty on JVM exit (Ctrl+C)
     (.addShutdownHook (Runtime/getRuntime)
@@ -45,4 +47,4 @@
                                (let [job-args (assoc-in (vec (:args job)) [2 :config] config)
                                      new-job (assoc job :args job-args)]
                                  (app opts new-job))))))
-    (start-server (api/compose-app config :auth-enabled) config)))
+    (start-server (api/compose-app config (not :auth-disabled)) config)))

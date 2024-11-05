@@ -29,7 +29,7 @@
 (defn check-endpoint [endpoint-id config]
   (try
     (let [{:keys [status body]} (validate/check-endpoint endpoint-id config)]
-      ;; If the client credentials for the validator are incorrect, the wrap-allowed-clients-checker
+      ;; If the client credentials for the validator are incorrect, the wrap-authentication
       ;; middleware has already returned 401 forbidden and execution doesn't get here.
       (handle-check-endpoint-response status body endpoint-id))
     (catch Throwable e
