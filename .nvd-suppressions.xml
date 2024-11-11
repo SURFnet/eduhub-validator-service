@@ -9,5 +9,10 @@
         <cve>CVE-2023-46120</cve>
         <!-- Related to RabbitMQ. We don't use RabbitMQ, nor do we let untrusted users add random jobs. -->
     </suppress>
-
+    <suppress>
+        <cvssBelow>5.0</cvssBelow>
+        <cve>CVE-2024-6763</cve>
+        <!-- Related to the Jetty HttpURI class. The HttpURI class does insufficient validation on the authority segment of a URI.
+             We don't use the HttpURI class or the authority segment of an URI. -->
+    </suppress>
 </suppressions>
