@@ -1,4 +1,5 @@
 // Define the endpoint and polling interval (in milliseconds)
+const rootUrl = `${window.location.protocol}//${window.location.host}`;
 const endpoint = `${rootUrl}/status/${validationUuid}`; // Replace with your actual endpoint
 const pollInterval = 2000; // Poll every 5 seconds
 
