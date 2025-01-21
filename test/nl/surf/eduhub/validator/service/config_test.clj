@@ -22,31 +22,32 @@
   (:import [clojure.lang ExceptionInfo]
            [java.io File]))
 
-(def default-env {:allowed-client-ids "default",
-                  :gateway-basic-auth-user "default",
-                  :gateway-basic-auth-pass "default",
-                  :gateway-url "https://gateway.test.surfeduhub.nl/",
-                  :max-total-requests "5",
-                  :ooapi-version "default",
-                  :surf-conext-client-id "default",
-                  :surf-conext-client-secret "default",
+(def default-env {:allowed-client-ids                 "default",
+                  :gateway-basic-auth-user            "default",
+                  :gateway-basic-auth-pass            "default",
+                  :gateway-url                        "https://gateway.test.surfeduhub.nl/",
+                  :max-total-requests                 "5",
+                  :ooapi-version                      "default",
+                  :redis-uri                          "redis://example.com"
+                  :surf-conext-client-id              "default",
+                  :surf-conext-client-secret          "default",
                   :surf-conext-introspection-endpoint "default"
-                  :server-port "3002"
-                  :validator-service-root-url "http://localhost:3002"
-                  :spider-timeout-millis "3600000"})
+                  :server-port                        "3002"
+                  :validator-service-root-url         "http://localhost:3002"
+                  :spider-timeout-millis              "3600000"})
 
-(def default-expected-value {:allowed-client-ids "default",
-                             :gateway-url "https://gateway.test.surfeduhub.nl/",
-                             :ooapi-version "default",
-                             :gateway-basic-auth {:pass "default", :user "john200"},
-                             :introspection-basic-auth {:pass "default", :user "default"},
+(def default-expected-value {:allowed-client-ids         "default",
+                             :gateway-url                "https://gateway.test.surfeduhub.nl/",
+                             :ooapi-version              "default",
+                             :gateway-basic-auth         {:pass "default", :user "john200"},
+                             :introspection-basic-auth   {:pass "default", :user "default"},
                              :introspection-endpoint-url "default"
-                             :max-total-requests 5,
-                             :server-port 3002
-                             :redis-conn {:spec {:uri "redis://localhost"}}
-                             :expiry-seconds 1209600
-                             :root-url "http://localhost:3002"
-                             :spider-timeout-millis 3600000})
+                             :max-total-requests         5,
+                             :server-port                3002
+                             :redis-conn                 {:spec {:uri "redis://example.com"}}
+                             :expiry-seconds             1209600
+                             :root-url                   "http://localhost:3002"
+                             :spider-timeout-millis      3600000})
 
 (defn- test-env [env]
   (-> default-env

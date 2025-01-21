@@ -39,9 +39,7 @@
                                         :in [:introspection-basic-auth :pass]]
    :surf-conext-introspection-endpoint ["SurfCONEXT introspection endpoint" :str
                                         :in [:introspection-endpoint-url]]
-   :redis-uri                          ["URI to redis" :str
-                                        :default "redis://localhost"
-                                        :in [:redis-conn :spec :uri]]
+   :redis-uri                          ["URI to redis" :str :in [:redis-conn :spec :uri]]
    :server-port                        ["Starts the app server on this port" :int]
    :job-status-expiry-seconds          ["Number of seconds before job status in Redis expires" :int
                                         :default (* 3600 24 14)
