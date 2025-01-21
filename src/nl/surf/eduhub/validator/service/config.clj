@@ -19,6 +19,7 @@
 (ns nl.surf.eduhub.validator.service.config
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
+            [clojure.tools.logging :as log]
             [nl.jomco.envopts :as envopts]))
 
 (def opt-specs
@@ -64,8 +65,8 @@
                       {:filename path, :env-path file-key}))
 
       (value-key env-map)
-      (throw (ex-info "ENV var contains secret both as file and as value"
-                      {:env-path [value-key file-key]}))
+      (do (log/warn "ENV var contains secret both as file and as value" value-key)
+          env-map)
 
       :else
       (-> env-map

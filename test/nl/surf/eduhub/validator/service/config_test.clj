@@ -79,5 +79,6 @@
     (let [path (.getAbsolutePath (File/createTempFile "test-secret" ".txt"))
           env {:gateway-basic-auth-user "john200"
                :gateway-basic-auth-user-file path}]
-      (spit path "john200")
-      (is (thrown? ExceptionInfo (test-env env)))))
+      (spit path "john201")
+      (is (= [default-expected-value]
+             (test-env env)))))

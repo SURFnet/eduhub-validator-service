@@ -27,7 +27,7 @@
   (with-redefs [http/request (fn [_]
                                (update gateway-response
                                        :body json/write-str))]
-    (checker/check-endpoint endpoint-id {})))
+    (checker/check-endpoint endpoint-id {:gateway-url "http://localhost"})))
 
 (deftest test-validate-correct
   (is (= {:status 200 :body {:valid true}}

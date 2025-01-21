@@ -35,4 +35,4 @@
     (catch Throwable e
       (log/error e "Internal error in validator-service")
       {:status http-status/internal-server-error
-       :body   {}})))
+       :body   {:error (ex-message e)}})))
