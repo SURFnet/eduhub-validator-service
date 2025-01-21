@@ -5,13 +5,14 @@
             [environ.core :refer [env]]
             [goose.client :as c]
             [nl.jomco.http-status-codes :as http-status]
+            [nl.surf.eduhub.validator.service.jobs.status :as status]
             [nl.surf.eduhub.validator.service.api :as api]
             [nl.surf.eduhub.validator.service.config :as config]
             [nl.surf.eduhub.validator.service.config-test :as config-test]
             [nl.surf.eduhub.validator.service.test-helper :as test-helper]))
 
 (def test-config
-  (first (config/load-config-from-env (merge config-test/default-env env))))
+  (first (config/load-config-from-env config-test/default-env)))
 
 (def app (api/compose-app test-config :auth-disabled))
 
@@ -23,6 +24,7 @@
     (is (= http-status/ok status))
     body))
 
+;; TODO: Explain what this does and why
 (defn- pop-queue! [atm]
   (let [old-val @atm]
     (when-not (empty? old-val)
@@ -36,10 +38,18 @@
   (testing "initial call to api"
     ;; mock c/perform-async
     (let [jobs-atom (atom [])
+          status-atom (atom {})
           dirname   "test/fixtures/validate_correct"
           vcr       (test-helper/make-playbacker dirname)]
       (with-redefs [c/perform-async (fn [_job-opts & args]
-                                      (swap! jobs-atom conj args))]
+                                      (swap! jobs-atom conj args))
+                    status/set-status-fields (fn [_ id status m _]
+                                               (swap! status-atom update id merge (assoc m
+                                                                                         (keyword (str status "-at")) "2025-01-01T01:01:01.001Z"
+                                                                                         :job-status status))
+                                               (prn status-atom))
+                    status/load-status (fn [_ id]
+                                         (get @status-atom id))]
         ;; make endpoint call
         (let [resp (app {:uri "/endpoints/google.com/paths" :request-method :post})]
           (is (= {:headers {"Content-Type" "application/json; charset=utf-8"}, :status 200}

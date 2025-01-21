@@ -19,42 +19,37 @@
 (ns nl.surf.eduhub.validator.service.checker-test
   (:require [babashka.http-client :as http]
             [babashka.json :as json]
-            [clojure.test :refer [deftest is]]
-            [environ.core :refer [env]]
-            [nl.surf.eduhub.validator.service.api :as api]
-            [nl.surf.eduhub.validator.service.config :as config]
-            [nl.surf.eduhub.validator.service.config-test :as config-test]))
+            [nl.surf.eduhub.validator.service.checker :as checker]
+            [clojure.test :refer [deftest is]]))
 
-(def test-config
-  (first (config/load-config-from-env (merge config-test/default-env env))))
 
-(def app (api/compose-app test-config :auth-disabled))
-
-(defn- response-match [actual req]
-  (is (= actual
-         (-> (app req)
-             (select-keys [:status :body])                    ; don't test headers
-             (update :body json/read-str)))))                 ; json easier to test after parsing
+(defn- result [endpoint-id gateway-response]
+  (with-redefs [http/request (fn [_]
+                               (update gateway-response
+                                       :body json/write-str))]
+    (checker/check-endpoint endpoint-id {})))
 
 (deftest test-validate-correct
-         (with-redefs [http/request (fn [_] {:status 200
-                                             :body   (json/write-str (assoc-in {} [:gateway :endpoints :google.com :responseCode] 200))})]
-           (response-match {:status 200 :body {:valid true}}
-                           {:uri "/endpoints/google.com/config" :request-method :post})))
+  (is (= {:status 200 :body {:valid true}}
+         (result "google.com"
+                 {:status 200
+                  :body   {:gateway {:endpoints {:google.com {:responseCode 200}}}}}))))
 
 (deftest test-validate-failed-endpoint
-         (with-redefs [http/request (fn [_] {:status 200
-                                             :body   (json/write-str (assoc-in {} [:gateway :endpoints :google.com :responseCode] 500))})]
-           (response-match {:status 200
-                             :body  {:valid false :message "Endpoint validation failed with status: 500"}}
-                           {:uri "/endpoints/google.com/config" :request-method :post})))
+  (is (= {:status 200
+          :body  {:valid false
+                  :message "Endpoint validation failed with status: 500"}}
+         (result
+          "google.com"
+          {:status 200
+           :body   {:gateway {:endpoints {:google.com {:responseCode 500}}}}}))))
 
 (deftest test-unexpected-gateway-status
-         (with-redefs [http/request (fn [_] {:status 500 :body {:message "mocked response"}})]
-           (response-match {:status 500 :body {}}
-                           {:uri "/endpoints/google.com/config" :request-method :post})))
+  (is (= {:status 500 :body {}}
+         (result "google.com"
+                 {:status 500 :body {:message "mocked response"}}))))
 
 (deftest test-validate-fails
-         (with-redefs [http/request (fn [_] {:status 401 :body "mocked response"})]
-           (response-match {:status 500 :body {}}
-                           {:uri "/endpoints/google.com/config" :request-method :post})))
+  (is (= {:status 500 :body {}}
+         (result "google.com"
+                 {:status 401 :body "mocked response"}))))
