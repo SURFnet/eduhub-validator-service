@@ -30,7 +30,7 @@
         [:script (h2/raw (str "var validationUuid = '" uuid "';"))]
         [:script {:src "/javascript/status.js"}]
         ;; Start polling for the status to change to "finished" or "failed"
-        [:script (when (= job-status "pending") (h2/raw (str "const polling = setInterval(pollJobStatus, pollInterval);")))]]
+        [:script (when (= job-status "pending") (h2/raw "const polling = setInterval(pollJobStatus, pollInterval);"))]]
        [:body
         [:div.profile-container
          [:h1 endpoint-id]

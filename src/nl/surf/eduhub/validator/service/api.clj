@@ -101,7 +101,8 @@
 
 (defn error-message-from-response
   [{:keys [status body]}]
-  (if (<= 400 status)
+  (when (or (http-status/client-error-status? status)
+            (http-status/server-error-status? status))
     (or (:message body)
         (let [msg (string/replace (str body) #"\s+" " ")]
           (if (<= 300 (count msg))
@@ -111,8 +112,8 @@
 (defn wrap-log
   [handler]
   (fn [request]
-    (try (let [{:keys [status body] :as response} (handler request)]
-           (if (<= 500 status)
+    (try (let [{:keys [status] :as response} (handler request)]
+           (if (http-status/server-error-status? status)
              (log/error (str (:status response) " " (:request-method request) " " (:uri request)))
              (log/info (str (:status response) " " (:request-method request) " " (:uri request))))
            (when-let [msg (error-message-from-response response)]

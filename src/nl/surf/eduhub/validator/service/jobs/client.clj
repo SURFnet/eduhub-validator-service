@@ -1,8 +1,6 @@
 (ns nl.surf.eduhub.validator.service.jobs.client
   (:require [clojure.tools.logging :as log]
-            [goose.brokers.redis.broker :as broker]
             [goose.client :as c]
-            [goose.retry :as retry]
             [nl.surf.eduhub.validator.service.jobs.status :as status]
             [nl.surf.eduhub.validator.service.jobs.worker :as worker])
   (:import [java.util UUID]))

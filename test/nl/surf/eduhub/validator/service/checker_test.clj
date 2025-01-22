@@ -19,6 +19,7 @@
 (ns nl.surf.eduhub.validator.service.checker-test
   (:require [babashka.http-client :as http]
             [babashka.json :as json]
+            [nl.jomco.http-status-codes :as status]
             [nl.surf.eduhub.validator.service.checker :as checker]
             [clojure.test :refer [deftest is]]))
 
@@ -30,26 +31,26 @@
     (checker/check-endpoint endpoint-id {:gateway-url "http://localhost"})))
 
 (deftest test-validate-correct
-  (is (= {:status 200 :body {:valid true}}
+  (is (= {:status status/ok :body {:valid true}}
          (result "google.com"
-                 {:status 200
-                  :body   {:gateway {:endpoints {:google.com {:responseCode 200}}}}}))))
+                 {:status status/ok
+                  :body   {:gateway {:endpoints {:google.com {:responseCode status/ok}}}}}))))
 
 (deftest test-validate-failed-endpoint
-  (is (= {:status 200
+  (is (= {:status status/ok
           :body  {:valid false
                   :message "Endpoint validation failed with status: 500"}}
          (result
           "google.com"
-          {:status 200
-           :body   {:gateway {:endpoints {:google.com {:responseCode 500}}}}}))))
+          {:status status/ok
+           :body   {:gateway {:endpoints {:google.com {:responseCode status/internal-server-error}}}}}))))
 
 (deftest test-unexpected-gateway-status
-  (is (= {:status 500 :body {}}
+  (is (= {:status status/internal-server-error :body {}}
          (result "google.com"
-                 {:status 500 :body {:message "mocked response"}}))))
+                 {:status status/internal-server-error :body {:message "mocked response"}}))))
 
 (deftest test-validate-fails
-  (is (= {:status 500 :body {}}
+  (is (= {:status status/internal-server-error :body {}}
          (result "google.com"
-                 {:status 401 :body "mocked response"}))))
+                 {:status status/unauthorized :body "mocked response"}))))

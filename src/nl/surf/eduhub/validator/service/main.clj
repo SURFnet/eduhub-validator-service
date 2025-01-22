@@ -19,7 +19,6 @@
 (ns nl.surf.eduhub.validator.service.main
   (:gen-class)
   (:require [environ.core :refer [env]]
-            [goose.brokers.redis.broker :as broker]
             [goose.worker :as w]
             [nl.jomco.resources :refer [mk-system closeable with-resources wait-until-interrupted]]
             [nl.surf.eduhub.validator.service.api :as api]

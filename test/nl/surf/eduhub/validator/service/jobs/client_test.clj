@@ -2,7 +2,6 @@
   (:require [babashka.http-client :as http]
             [babashka.json :as json]
             [clojure.test :refer [deftest is testing]]
-            [environ.core :refer [env]]
             [goose.client :as c]
             [nl.jomco.http-status-codes :as http-status]
             [nl.surf.eduhub.validator.service.jobs.status :as status]
