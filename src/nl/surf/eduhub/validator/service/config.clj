@@ -20,7 +20,12 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.tools.logging :as log]
-            [nl.jomco.envopts :as envopts]))
+            [nl.jomco.envopts :as envopts]
+            [goose.brokers.redis.broker :as redis.broker]
+            [goose.worker]
+            [goose.client]
+            [goose.retry]))
+
 
 (def opt-specs
   {:gateway-url                        ["URL of gateway" :str
@@ -73,14 +78,26 @@
           (assoc value-key (str/trim (slurp path)))
           (dissoc file-key)))))
 
-;; These ENV keys may alternatively have a form in which the secret is contained in a file.
-;; These ENV keys have a -file suffix, e.g.: gateway-basic-auth-pass-file
-(def env-keys-with-alternate-file-secret
-  [:gateway-basic-auth-user :gateway-basic-auth-pass :surf-conext-client-id :surf-conext-client-secret])
+(defn job-error-handler [_cfg _job ex]
+  (log/error ex "Error in job"))
+
+(defn add-goose-config
+  [[config errs]]
+  (if errs
+    [config errs]
+    (let [goose-conn-opts {:url (get-in config [:redis-conn :spec :uri])}]
+      [(assoc config
+              :goose-worker-opts (-> goose.worker/default-opts
+                                     (assoc :broker (redis.broker/new-consumer goose-conn-opts)))
+              :goose-client-opts (-> goose.client/default-opts
+                                     (assoc :retry-opts (assoc goose.retry/default-opts
+                                                               :error-handler-fn-sym 'nl.surf.eduhub.validator.service.jobs.client/job-error-handler)
+                                            :broker (redis.broker/new-producer goose-conn-opts))))])))
 
 (defn load-config-from-env [env-map]
-  (-> (reduce file-secret-loader-reducer env-map env-keys-with-alternate-file-secret)
-      (envopts/opts opt-specs)))
+  (-> (reduce file-secret-loader-reducer env-map (keys opt-specs))
+      (envopts/opts opt-specs)
+      (add-goose-config)))
 
 (defn validate-and-load-config [env]
   (let [[config errs] (load-config-from-env env)]

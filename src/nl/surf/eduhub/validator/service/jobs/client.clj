@@ -10,13 +10,9 @@
 (defn job-error-handler [_cfg _job ex]
   (log/error ex "Error in job"))
 
-(def client-opts (assoc c/default-opts
-                   :broker (broker/new-producer broker/default-opts)
-                   :retry-opts (assoc retry/default-opts :error-handler-fn-sym `job-error-handler)))
-
 ;; Enqueue the validate-endpoint call in the worker queue.
 (defn enqueue-validation
-  [endpoint-id profile {:keys [redis-conn gateway-basic-auth gateway-url ooapi-version max-total-requests root-url] :as _config}]
+  [endpoint-id profile {:keys [redis-conn gateway-basic-auth gateway-url ooapi-version max-total-requests root-url goose-client-opts] :as _config}]
   (let [uuid (str (UUID/randomUUID))
         prof (or profile "rio")
         opts {:basic-auth         gateway-basic-auth
@@ -25,5 +21,5 @@
               :ooapi-version      ooapi-version
               :profile            prof}]
     (status/set-status-fields redis-conn uuid "pending" {:endpoint-id endpoint-id, :profile prof} nil)
-    (c/perform-async client-opts `worker/validate-endpoint endpoint-id uuid opts)
+    (c/perform-async goose-client-opts `worker/validate-endpoint endpoint-id uuid opts)
     {:status 200 :body {:job-status "pending" :uuid uuid, :web-url (str root-url "/view/status/" uuid)}}))

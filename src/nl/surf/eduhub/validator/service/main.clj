@@ -21,29 +21,26 @@
   (:require [environ.core :refer [env]]
             [goose.brokers.redis.broker :as broker]
             [goose.worker :as w]
+            [nl.jomco.resources :refer [mk-system closeable with-resources wait-until-interrupted]]
             [nl.surf.eduhub.validator.service.api :as api]
             [nl.surf.eduhub.validator.service.config :as config]
             [ring.adapter.jetty :refer [run-jetty]]))
 
-;; Starts a Jetty server on given port.
-(defn start-server [routes {:keys [server-port] :as _config}]
-  (let [server  (-> routes
-                    (run-jetty {:port server-port :join? false}))
-        handler ^Runnable (fn [] (.stop server))]
-    ;; Add a shutdown hook to stop Jetty on JVM exit (Ctrl+C)
-    (.addShutdownHook (Runtime/getRuntime)
-                      (Thread. handler))
-    server))
+(defn run-system
+  [{:keys [server-port goose-worker-opts] :as config}]
+  (mk-system [worker (-> (w/start goose-worker-opts)
+                         (closeable w/stop))
+              web-app (api/compose-app config true)
+              jetty (run-jetty web-app
+                               {:port  server-port
+                                :join? false})]
+    {:worker  worker
+     :web-app web-app
+     :jetty   jetty}))
+
 
 (defn -main [& _]
   (let [config (config/validate-and-load-config env)]
-    ;; set config as global var (read-only) so that the workers can access it
-    (w/start (assoc w/default-opts
-               :broker (broker/new-consumer broker/default-opts)
-               :middlewares (fn [app]
-                             (fn [opts job]
-                               ;; adds config to map at the last of the args in job
-                               (let [job-args (assoc-in (vec (:args job)) [2 :config] config)
-                                     new-job (assoc job :args job-args)]
-                                 (app opts new-job))))))
-    (start-server (api/compose-app config (not :auth-disabled)) config)))
+    (with-resources [_ (run-system config)]
+      (wait-until-interrupted))
+    (shutdown-agents)))

@@ -85,7 +85,8 @@
       (wrap-json-response)
       (wrap-defaults api-defaults)))
 
-(defn private-routes [{:keys [introspection-endpoint-url introspection-basic-auth allowed-client-ids] :as config} auth-disabled]
+(defn private-routes [{:keys [introspection-endpoint-url introspection-basic-auth
+                              allowed-client-ids] :as config} auth-disabled]
   (let [allowed-client-id-set (set (str/split allowed-client-ids #","))
         auth-opts             {:auth-disabled (boolean auth-disabled)}]
     (-> (compojure.core/routes
