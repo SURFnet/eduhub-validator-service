@@ -20,7 +20,9 @@
   (:gen-class)
   (:require [environ.core :refer [env]]
             [goose.worker :as w]
+            [clojure.tools.logging :as log]
             [nl.jomco.resources :refer [mk-system closeable with-resources wait-until-interrupted]]
+            [nl.surf.eduhub.validator.service.redis-check :refer [check-redis-connection]]
             [nl.surf.eduhub.validator.service.api :as api]
             [nl.surf.eduhub.validator.service.config :as config]
             [ring.adapter.jetty :refer [run-jetty]]))
@@ -40,6 +42,10 @@
 
 (defn -main [& _]
   (let [config (config/validate-and-load-config env)]
+    (try (check-redis-connection config)
+         (catch Exception e
+           (log/error e "Error checking Redis connection")
+           (System/exit 1)))
     (with-resources [_ (run-system config)]
       (wait-until-interrupted))
     (shutdown-agents)))
