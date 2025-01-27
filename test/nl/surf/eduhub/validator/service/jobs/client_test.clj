@@ -5,6 +5,7 @@
             [goose.client :as c]
             [nl.jomco.http-status-codes :as http-status]
             [nl.surf.eduhub.validator.service.jobs.status :as status]
+            [nl.surf.eduhub.validator.service.jobs.worker :as worker]
             [nl.surf.eduhub.validator.service.api :as api]
             [nl.surf.eduhub.validator.service.config :as config]
             [nl.surf.eduhub.validator.service.config-test :as config-test]
@@ -72,7 +73,8 @@
               (with-redefs [http/request (fn wrap-vcr [req] (vcr req))]
                 ;; run worker
                 (let [[fname & args] (pop-queue! jobs-atom)]
-                  (apply (resolve fname) (assoc-in (vec args) [2 :config] test-config)))
+                  (binding [worker/*config* test-config]
+                    (apply (resolve fname) args)))
 
                 (let [body (-> (make-status-call uuid)
                                (test-helper/validate-timestamp :pending-at)

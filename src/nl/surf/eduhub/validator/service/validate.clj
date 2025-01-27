@@ -29,13 +29,15 @@
   "Performs a synchronous validation via the eduhub-validator"
   [endpoint-id {:keys [gateway-url gateway-basic-auth ooapi-version] :as _config}]
   {:pre [gateway-url]}
-  (let [url (str gateway-url (if (.endsWith gateway-url "/") "" "/") "courses")
-        opts {:headers {"x-route" (str "endpoint=" endpoint-id)
-                        "accept" (str "application/json; version=" ooapi-version)
-                        "x-envelope-response" "true"}
-              :basic-auth gateway-basic-auth
-              :throw false}]
-    (http/get url opts)))
+  (let [url      (str gateway-url (if (.endsWith gateway-url "/") "" "/") "courses")
+        opts     {:headers    {"x-route"             (str "endpoint=" endpoint-id)
+                               "accept"              (str "application/json; version=" ooapi-version)
+                               "x-envelope-response" "true"}
+                  :basic-auth gateway-basic-auth
+                  :throw      false}
+        response (http/get url opts)]
+    (log/info (str (:status response) " :get " url opts))
+    response))
 
 ;; Uses the ooapi validator to validate an endpoint.
 ;; Returns the generated HTML report.

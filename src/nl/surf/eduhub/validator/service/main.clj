@@ -19,9 +19,9 @@
 (ns nl.surf.eduhub.validator.service.main
   (:gen-class)
   (:require [environ.core :refer [env]]
-            [goose.worker :as w]
             [clojure.tools.logging :as log]
-            [nl.jomco.resources :refer [mk-system closeable with-resources wait-until-interrupted Resource]]
+            [nl.jomco.resources :refer [mk-system with-resources wait-until-interrupted Resource]]
+            [nl.surf.eduhub.validator.service.jobs.worker :as jobs.worker]
             [nl.surf.eduhub.validator.service.redis-check :refer [check-redis-connection]]
             [nl.surf.eduhub.validator.service.api :as api]
             [nl.surf.eduhub.validator.service.config :as config]
@@ -34,9 +34,8 @@
     (.stop server)))
 
 (defn run-system
-  [{:keys [server-port goose-worker-opts] :as config}]
-  (mk-system [worker (-> (w/start goose-worker-opts)
-                         (closeable w/stop))
+  [{:keys [server-port] :as config}]
+  (mk-system [worker (jobs.worker/mk-worker config)
               web-app (api/compose-app config true)
               jetty (run-jetty web-app
                                {:port  server-port
@@ -44,7 +43,6 @@
     {:worker  worker
      :web-app web-app
      :jetty   jetty}))
-
 
 (defn -main [& _]
   (let [config (config/validate-and-load-config env)]
