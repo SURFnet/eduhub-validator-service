@@ -21,11 +21,17 @@
   (:require [environ.core :refer [env]]
             [goose.worker :as w]
             [clojure.tools.logging :as log]
-            [nl.jomco.resources :refer [mk-system closeable with-resources wait-until-interrupted]]
+            [nl.jomco.resources :refer [mk-system closeable with-resources wait-until-interrupted Resource]]
             [nl.surf.eduhub.validator.service.redis-check :refer [check-redis-connection]]
             [nl.surf.eduhub.validator.service.api :as api]
             [nl.surf.eduhub.validator.service.config :as config]
             [ring.adapter.jetty :refer [run-jetty]]))
+
+;; Ensure jetty server is stopped when system is stopped
+(extend-protocol Resource
+  org.eclipse.jetty.server.Server
+  (close [server]
+    (.stop server)))
 
 (defn run-system
   [{:keys [server-port goose-worker-opts] :as config}]
