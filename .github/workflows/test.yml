@@ -3,7 +3,7 @@ name: Run checks, tests and docker build
 on: push
 
 jobs:
-  lint:
+  check:
     runs-on: ubuntu-latest
 
     steps:
@@ -12,21 +12,11 @@ jobs:
       with: { path: "~/.m2", key: "${{ runner.os }}-m2" }
 
     - name: Install clj runtime
-      run: .github/workflows/install-binaries.sh
-
-    - name: Run linters
-      run: bin/clojure -M:lint
-
-  test:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v4
-    - uses: actions/cache@v4
-      with: { path: "~/.m2", key: "${{ runner.os }}-m2" }
-
-    - name: Install clj runtime
-      run: .github/workflows/install-binaries.sh
+      run: |
+        cd "$HOME"
+        curl -L -O https://github.com/clojure/brew-install/releases/latest/download/posix-install.sh
+        chmod +x posix-install.sh
+        sudo ./posix-install.sh
 
     - name: Start Redis
       uses: supercharge/redis-github-action@1.4.0
@@ -40,4 +30,4 @@ jobs:
         GATEWAY_BASIC_AUTH_PASS: ${{ secrets.GATEWAY_BASIC_AUTH_PASS }}
         SERVER_PORT: 3002
 
-      run: bin/clojure -M:test
+      run: make check

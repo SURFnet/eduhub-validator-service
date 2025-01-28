@@ -2,16 +2,17 @@
   (:require [babashka.http-client :as http]
             [babashka.json :as json]
             [clojure.test :refer [deftest is testing]]
-            [environ.core :refer [env]]
             [goose.client :as c]
             [nl.jomco.http-status-codes :as http-status]
+            [nl.surf.eduhub.validator.service.jobs.status :as status]
+            [nl.surf.eduhub.validator.service.jobs.worker :as worker]
             [nl.surf.eduhub.validator.service.api :as api]
             [nl.surf.eduhub.validator.service.config :as config]
             [nl.surf.eduhub.validator.service.config-test :as config-test]
             [nl.surf.eduhub.validator.service.test-helper :as test-helper]))
 
 (def test-config
-  (first (config/load-config-from-env (merge config-test/default-env env))))
+  (first (config/load-config-from-env config-test/default-env)))
 
 (def app (api/compose-app test-config :auth-disabled))
 
@@ -23,23 +24,35 @@
     (is (= http-status/ok status))
     body))
 
-(defn- pop-queue! [atm]
-  (let [old-val @atm]
+(defn- pop-queue!
+  "Remove and return first item from `queue-atom`.
+
+  Returns `nil` if queue-atom is empty."
+  [queue-atom]
+  (let [old-val @queue-atom]
     (when-not (empty? old-val)
       (let [item    (peek old-val)
             new-val (pop old-val)]
-        (if (compare-and-set! atm old-val new-val)
+        (if (compare-and-set! queue-atom old-val new-val)
           item
-          (pop-queue! atm))))))
+          (pop-queue! queue-atom))))))
 
 (deftest test-queue
   (testing "initial call to api"
     ;; mock c/perform-async
     (let [jobs-atom (atom [])
+          status-atom (atom {})
           dirname   "test/fixtures/validate_correct"
           vcr       (test-helper/make-playbacker dirname)]
       (with-redefs [c/perform-async (fn [_job-opts & args]
-                                      (swap! jobs-atom conj args))]
+                                      (swap! jobs-atom conj args))
+                    status/set-status-fields (fn [_ id status m _]
+                                               (swap! status-atom update id merge (assoc m
+                                                                                         (keyword (str status "-at")) "2025-01-01T01:01:01.001Z"
+                                                                                         :job-status status))
+                                               (prn status-atom))
+                    status/load-status (fn [_ id]
+                                         (get @status-atom id))]
         ;; make endpoint call
         (let [resp (app {:uri "/endpoints/google.com/paths" :request-method :post})]
           (is (= {:headers {"Content-Type" "application/json; charset=utf-8"}, :status 200}
@@ -63,7 +76,8 @@
               (with-redefs [http/request (fn wrap-vcr [req] (vcr req))]
                 ;; run worker
                 (let [[fname & args] (pop-queue! jobs-atom)]
-                  (apply (resolve fname) (assoc-in (vec args) [2 :config] test-config)))
+                  (binding [worker/*config* test-config]
+                    (apply (resolve fname) args)))
 
                 (let [body (-> (make-status-call uuid)
                                (test-helper/validate-timestamp :pending-at)

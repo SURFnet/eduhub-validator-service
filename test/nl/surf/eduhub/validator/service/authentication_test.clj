@@ -88,7 +88,7 @@
             "Not authorized when no token provided")
 
         (is (= http-status/forbidden
-               (:status (handler {:headers {"authorization" (str "Bearer invalid-token")}})))
+               (:status (handler {:headers {"authorization" "Bearer invalid-token"}})))
             "Forbidden with invalid token")
 
         (is (= 2 @count-calls)
@@ -115,7 +115,7 @@
             "Not authorized when no token provided")
 
         (is (= http-status/forbidden
-               (:status (handler {:headers {"authorization" (str "Bearer invalid-token")}})))
+               (:status (handler {:headers {"authorization" "Bearer invalid-token"}})))
             "Forbidden with invalid token")
 
         (is (= 2 @count-calls)

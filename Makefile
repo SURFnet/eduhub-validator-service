@@ -15,7 +15,11 @@ classes/nl/surf/eduhub/validator/service/main.class: src/nl/surf/eduhub/validato
 target/eduhub-validator-service.jar: classes/nl/surf/eduhub/validator/service/main.class
 	clojure -M:uberjar --main-class nl.surf.eduhub.validator.service.main --target $@
 
-lint:
+prep-lint:
+	mkdir -p ./.clj-kondo
+	clojure -M:lint --lint $$(clojure -Spath)  --copy-configs --dependencies --skip-lint
+
+lint: prep-lint
 	clojure -M:lint
 
 test:

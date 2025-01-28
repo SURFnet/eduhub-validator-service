@@ -58,7 +58,9 @@ Delete the report and the associated status data from the Redis database.
 
 ## Configuring
 
-The service is configured using environment variables:
+### Environment vars
+
+The service can be fully configured using environment variables:
 
 ```
 GATEWAY_URL                         https://gateway.test.surfeduhub.nl/
@@ -75,6 +77,27 @@ REDIS_URI                           URI to redis
 JOB_STATUS_EXPIRY_SECONDS           Number of seconds before job status in Redis expires
 SPIDER_TIMEOUT_MILLIS               Maximum number of milliseconds before spider timeout.
 VALIDATOR_SERVICE_ROOT_URL          The root url of the web endpoint, used to generate a url to a status view. This url is included in the json output after starting a validation job as "web-url".
+```
+
+### Secret files
+
+If secrets need to be kept out of the environment, for all variables
+`VAR_NAME` it is possible to provide a `VAR_NAME_FILE` variable
+instead, which provides a path to a file containing the corresponding
+value.
+
+For instance, if REDIS_URI would contain a password, create a file
+`/var/secrets/redis_uri` containing
+`redis://someuser:apassword@redis.example.com`, and provide a
+`REDIS_URI_FILE` variable containing `/var/secrets/redis_uri`.
+
+## Debugging configuration
+
+In order to see the configuration as used by the service, run the
+following in the environment:
+
+```
+java -cp /path/to/eduhub-validator-service.jar clojure.main -e "(do (require '[nl.surf.eduhub.validator.service.config :as config]) (prn (config/validate-and-load-config environ.core/env)))"
 ```
 
 ## Build
