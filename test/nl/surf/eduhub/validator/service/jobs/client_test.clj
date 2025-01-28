@@ -24,15 +24,18 @@
     (is (= http-status/ok status))
     body))
 
-;; TODO: Explain what this does and why
-(defn- pop-queue! [atm]
-  (let [old-val @atm]
+(defn- pop-queue!
+  "Remove and return first item from `queue-atom`.
+
+  Returns `nil` if queue-atom is empty."
+  [queue-atom]
+  (let [old-val @queue-atom]
     (when-not (empty? old-val)
       (let [item    (peek old-val)
             new-val (pop old-val)]
-        (if (compare-and-set! atm old-val new-val)
+        (if (compare-and-set! queue-atom old-val new-val)
           item
-          (pop-queue! atm))))))
+          (pop-queue! queue-atom))))))
 
 (deftest test-queue
   (testing "initial call to api"
