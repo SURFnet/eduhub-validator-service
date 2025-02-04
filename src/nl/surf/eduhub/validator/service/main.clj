@@ -18,13 +18,13 @@
 
 (ns nl.surf.eduhub.validator.service.main
   (:gen-class)
-  (:require [environ.core :refer [env]]
-            [clojure.tools.logging :as log]
-            [nl.jomco.resources :refer [mk-system with-resources wait-until-interrupted Resource]]
-            [nl.surf.eduhub.validator.service.jobs.worker :as jobs.worker]
-            [nl.surf.eduhub.validator.service.redis-check :refer [check-redis-connection]]
+  (:require [clojure.tools.logging :as log]
+            [environ.core :refer [env]]
+            [nl.jomco.resources :refer [mk-system Resource wait-until-interrupted with-resources]]
             [nl.surf.eduhub.validator.service.api :as api]
             [nl.surf.eduhub.validator.service.config :as config]
+            [nl.surf.eduhub.validator.service.jobs.worker :as jobs.worker]
+            [nl.surf.eduhub.validator.service.redis-monitor :refer [check-redis-connection run-redis-monitor]]
             [ring.adapter.jetty :refer [run-jetty]]))
 
 ;; Ensure jetty server is stopped when system is stopped
@@ -35,14 +35,17 @@
 
 (defn run-system
   [{:keys [server-port] :as config}]
-  (mk-system [worker (jobs.worker/mk-worker config)
-              web-app (api/compose-app config true)
-              jetty (run-jetty web-app
-                               {:port  server-port
-                                :join? false})]
-    {:worker  worker
-     :web-app web-app
-     :jetty   jetty}))
+  (let [parent-thread (Thread/currentThread)]
+    (mk-system [worker (jobs.worker/mk-worker config)
+                web-app (api/compose-app config true)
+                jetty (run-jetty web-app
+                                 {:port  server-port
+                                  :join? false})
+                redis-monitor (run-redis-monitor config #(.interrupt parent-thread))]
+      {:worker        worker
+       :redis-monitor redis-monitor
+       :web-app       web-app
+       :jetty         jetty})))
 
 (defn -main [& _]
   (let [config (config/validate-and-load-config env)]
