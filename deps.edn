@@ -10,10 +10,9 @@
          hiccup/hiccup                               {:mvn/version "2.0.0-RC1"}
          nl.jomco/clj-http-status-codes              {:mvn/version "0.1"}
          nl.jomco/envopts                            {:mvn/version "0.0.4"}
-         nl.surf/apie                                {:git/url "https://github.com/SURFnet/apie.git"
-                                                      :git/sha "4f912f114d29e3edf61b4b331416fa2b90cbeaa6"}
          nl.surfnet/eduhub-validator                 {:git/url    "https://github.com/SURFnet/eduhub-validator"
-                                                      :git/sha    "fe0b456e42abe218fe375b1a5f183bee46a6e222"
+                                                      :git/sha    "e8293b10d15648581beb5c84f089dc3373b938e0"
+                                                      :git/tag    "v0.2.1"
                                                       :git/branch "main"}
          nl.jomco/with-resources                     {:mvn/version "0.1.2"}
          org.babashka/http-client                    {:mvn/version "0.4.19"}
