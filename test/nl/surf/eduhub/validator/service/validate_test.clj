@@ -46,6 +46,9 @@
                   :base-url           gateway-url
                   :max-total-requests max-total-requests
                   :ooapi-version      5
-                  :profile       "rio"}]
-        (is (str/includes? (validate/validate-endpoint "demo04.test.surfeduhub.nl" opts)
-                           "5 observations have no issues"))))))
+                  :profile       "rio"}
+            report (validate/validate-endpoint "demo04.test.surfeduhub.nl" opts)]
+        (is (str/includes? report
+                           "<dt>Number of requests</dt><dd>5</dd>"))
+        (is (str/includes? report
+                           "No issues found."))))))
