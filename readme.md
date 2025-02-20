@@ -15,13 +15,13 @@ On success, responds with a `200 OK` status
 
 On error, responds with a `502 Bad Gateway` status.
 
-`GET /endpoints/{endpointId}/config`
+`POST /endpoints/{endpointId}/config`
 
 ### Validate endpoint
 
 Use the validator to validate the endpoint and generate a report.
 
-`GET /endpoints/{endpointId}/paths`
+`POST /endpoints/{endpointId}/paths`
 
 ### Fetch Status
 
