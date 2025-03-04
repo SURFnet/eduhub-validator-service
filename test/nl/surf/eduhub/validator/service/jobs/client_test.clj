@@ -66,7 +66,7 @@
             ;; assert job status pending
             (is (= job-status "pending"))
             ;; make http request to status
-            (is (= {:job-status "pending" :profile "rio" :endpoint-id "google.com"}
+            (is (= {:job-status "pending" :profile "ooapi" :endpoint-id "google.com"}
                    (-> (make-status-call uuid)
                        (test-helper/validate-timestamp :pending-at))))
 
@@ -84,5 +84,5 @@
                                (test-helper/validate-timestamp :finished-at))]
 
                   ;; assert status response with status finished and html report
-                  (is (= {:job-status "finished" :profile "rio" :endpoint-id "google.com"}
+                  (is (= {:job-status "finished" :profile "ooapi" :endpoint-id "google.com"}
                          (dissoc body :html-report))))))))))))
