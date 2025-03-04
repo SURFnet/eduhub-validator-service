@@ -22,7 +22,7 @@
 (defn check-redis-connection
   [{:keys [redis-conn] :as _config}]
   (log/debug "Testing redis connection")
-  (let [response (car/wcar redis-conn (car/ping))]
+  (let [response (car/wcar redis-conn #_:clj-kondo/ignore (car/ping))]
     (when-not (= "PONG" response)
       (throw (ex-info "Unexpected PING response from redis"
                       {:reponse response})))))
