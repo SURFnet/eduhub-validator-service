@@ -15,13 +15,13 @@ On success, responds with a `200 OK` status
 
 On error, responds with a `502 Bad Gateway` status.
 
-`POST /endpoints/{endpointId}/config`
+`GET /configstatus/{endpointId}`
 
 ### Validate endpoint
 
 Use the validator to validate the endpoint and generate a report.
 
-`POST /endpoints/{endpointId}/paths`
+`POST /jobs/paths/{endpointId}?profile=ooapi`
 
 ### Fetch Status
 
@@ -116,8 +116,8 @@ curl -v 'http://localhost:3002/endpoints/demo04.test.surfeduhub.nl/config'
 make docker-build
 docker compose up
 # To test:
-curl -v 'http://localhost:3002/endpoints/demo04.test.surfeduhub.nl/config'
-curl -v 'http://localhost:3002/endpoints/demo04.test.surfeduhub.nl/paths'
+curl -v 'http://localhost:3002/configstatus/demo04.test.surfeduhub.nl'
+curl -v -X POST 'http://localhost:3002/jobs/paths/demo04.test.surfeduhub.nl'
 ```
 
 ## Run locally
@@ -127,7 +127,7 @@ make
 java -jar target/eduhub-validator-service.jar
 # Extract ACCESS_TOKEN
 curl -s -X POST https://connect.test.surfconext.nl/oidc/token -u client01.registry.validator.dev.surfeduhub.nl:$SURF_CONEXT_PASSWORD -d "grant_type=client_credentials"
-curl -v -X POST 'http://localhost:3002/endpoints/demo04.test.surfeduhub.nl/paths?profile=rio' -H "Authorization: Bearer $ACCESS_TOKEN" 
+curl -v -X POST 'http://localhost:3002/jobs/paths/demo04.test.surfeduhub.nl?profile=rio' -H "Authorization: Bearer $ACCESS_TOKEN" 
 ```
 
 ## Notes

@@ -91,9 +91,9 @@
   (let [allowed-client-id-set (set (string/split allowed-client-ids #","))
         auth-opts             {:auth-disabled (boolean auth-disabled)}]
     (-> (compojure.core/routes
-          (POST "/endpoints/:endpoint-id/config" [endpoint-id]
+         (GET "/configstatus/:endpoint-id" [endpoint-id]
             (checker/check-endpoint endpoint-id config))
-          (POST "/endpoints/:endpoint-id/paths" [endpoint-id profile]
+         (POST "/jobs/paths/:endpoint-id" [endpoint-id profile]
             (jobs-client/enqueue-validation endpoint-id profile config)))
         (auth/wrap-authentication introspection-endpoint-url introspection-basic-auth allowed-client-id-set auth-opts)
         (wrap-json-response)
