@@ -54,7 +54,7 @@
                     status/load-status (fn [_ id]
                                          (get @status-atom id))]
         ;; make endpoint call
-        (let [resp (app {:uri "/endpoints/google.com/paths" :request-method :post})]
+        (let [resp (app {:uri "/jobs/paths/google.com" :request-method :post})]
           (is (= {:headers {"Content-Type" "application/json; charset=utf-8"}, :status 200}
                  (select-keys resp [:headers :status])))
           ;; assert status OK
@@ -66,7 +66,7 @@
             ;; assert job status pending
             (is (= job-status "pending"))
             ;; make http request to status
-            (is (= {:job-status "pending" :profile "rio" :endpoint-id "google.com"}
+            (is (= {:job-status "pending" :profile "ooapi" :endpoint-id "google.com"}
                    (-> (make-status-call uuid)
                        (test-helper/validate-timestamp :pending-at))))
 
@@ -84,5 +84,5 @@
                                (test-helper/validate-timestamp :finished-at))]
 
                   ;; assert status response with status finished and html report
-                  (is (= {:job-status "finished" :profile "rio" :endpoint-id "google.com"}
+                  (is (= {:job-status "finished" :profile "ooapi" :endpoint-id "google.com"}
                          (dissoc body :html-report))))))))))))

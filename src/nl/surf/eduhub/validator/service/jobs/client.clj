@@ -12,7 +12,7 @@
 (defn enqueue-validation
   [endpoint-id profile {:keys [redis-conn gateway-basic-auth gateway-url ooapi-version max-total-requests root-url goose-client-opts] :as _config}]
   (let [uuid (str (UUID/randomUUID))
-        prof (or profile "rio")
+        prof (or profile "ooapi")
         opts {:basic-auth         gateway-basic-auth
               :base-url           gateway-url
               :max-total-requests max-total-requests
