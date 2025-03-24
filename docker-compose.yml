@@ -1,7 +1,6 @@
-# SPDX-FileCopyrightText: 2024 SURF B.V.
-# SPDX-FileContributor: Joost Diepenmaat
-#
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2024, 2025 SURF B.V.
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileContributor: Michiel de Mare
 
 services:
   validator-service:

@@ -1,3 +1,9 @@
+# SPDX-FileCopyrightText: 2024, 2025 SURF B.V.
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileContributor: Joost Diepenmaat
+# SPDX-FileContributor: Michiel de Mare
+# SPDX-FileContributor: Remco van 't Veer
+
 name: Run checks, tests and docker build
 
 on: push
@@ -10,6 +16,10 @@ jobs:
     - uses: actions/checkout@v4
     - uses: actions/cache@v4
       with: { path: "~/.m2", key: "${{ runner.os }}-m2" }
+
+    - name: Install packages
+      run: |
+        sudo apt-get install -y reuse
 
     - name: Install clj runtime
       run: |

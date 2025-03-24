@@ -1,10 +1,10 @@
-# SPDX-FileCopyrightText: 2024 SURF B.V.
+# SPDX-FileCopyrightText: 2024, 2025 SURF B.V.
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # SPDX-FileContributor: Joost Diepenmaat
+# SPDX-FileContributor: Michiel de Mare
 # SPDX-FileContributor: Remco van 't Veer
-#
-# SPDX-License-Identifier: Apache-2.0
 
-.PHONY: lint test check clean
+.PHONY: lint lint-clj lint-license test check clean
 
 default: target/eduhub-validator-service.jar
 
@@ -19,8 +19,13 @@ prep-lint:
 	mkdir -p ./.clj-kondo
 	clojure -M:lint --lint $$(clojure -Spath)  --copy-configs --dependencies --skip-lint
 
-lint: prep-lint
+lint-clj: prep-lint
 	clojure -M:lint
+
+lint-license:
+	reuse lint
+
+lint: lint-clj lint-license
 
 test:
 	clojure -M:test

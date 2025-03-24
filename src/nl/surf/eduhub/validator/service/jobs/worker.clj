@@ -1,3 +1,9 @@
+;; SPDX-FileCopyrightText: 2024, 2025 SURF B.V.
+;; SPDX-License-Identifier: AGPL-3.0-or-later
+;; SPDX-FileContributor: Joost Diepenmaat
+;; SPDX-FileContributor: Michiel de Mare
+;; SPDX-FileContributor: Remco van 't Veer
+
 (ns nl.surf.eduhub.validator.service.jobs.worker
   "Functions called called by a worker thread running in the background."
   (:require [clojure.tools.logging :as log]

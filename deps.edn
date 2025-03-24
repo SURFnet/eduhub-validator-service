@@ -1,3 +1,8 @@
+;; SPDX-FileCopyrightText: 2024, 2025 SURF B.V.
+;; SPDX-License-Identifier: AGPL-3.0-or-later
+;; SPDX-FileContributor: Joost Diepenmaat
+;; SPDX-FileContributor: Michiel de Mare
+
 {:paths ["src" "test" "resources" "classes"]
  :deps  {ch.qos.logback.contrib/logback-jackson      {:mvn/version "0.1.5"}
          ch.qos.logback.contrib/logback-json-classic {:mvn/version "0.1.5"}

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024, 2025 SURF B.V.
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileContributor: Michiel de Mare
+
 // Define the endpoint and polling interval (in milliseconds)
 const rootUrl = `${window.location.protocol}//${window.location.host}`;
 const endpoint = `${rootUrl}/status/${validationUuid}`; // Replace with your actual endpoint

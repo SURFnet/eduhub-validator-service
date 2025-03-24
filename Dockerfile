@@ -1,7 +1,6 @@
-# SPDX-FileCopyrightText: 2024 SURF B.V.
-# SPDX-FileContributor: Joost Diepenmaat
-#
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2024, 2025 SURF B.V.
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileContributor: Michiel de Mare
 
 FROM clojure:temurin-21-tools-deps-1.11.1.1435 AS builder
 RUN apt-get -y update

@@ -1,3 +1,8 @@
+;; SPDX-FileCopyrightText: 2024, 2025 SURF B.V.
+;; SPDX-License-Identifier: AGPL-3.0-or-later
+;; SPDX-FileContributor: Joost Diepenmaat
+;; SPDX-FileContributor: Remco van 't Veer
+
 (ns user
   (:require [nl.surf.eduhub.validator.service.main :as main]
             [nl.surf.eduhub.validator.service.config :as config]
