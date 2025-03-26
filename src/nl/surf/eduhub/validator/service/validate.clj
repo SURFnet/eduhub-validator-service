@@ -49,18 +49,19 @@
         report-path       (.getAbsolutePath report-file)
         observations-file (File/createTempFile "observations" ".edn")
         observations-path (.getAbsolutePath observations-file)
-        defaults {:bearer-token nil,
-                  :no-report? false,
-                  :max-total-requests max-total-requests,
-                  :report-path report-path,
-                  :headers {:x-route (str "endpoint=" endpoint-id),
-                            :accept (str "application/json; version=" ooapi-version),
-                            :x-envelope-response "false"},
-                  :no-spider? false,
-                  :max-requests-per-operation ##Inf,
-                  :spider-timeout-millis spider-timeout-millis,
-                  :observations-path observations-path,
-                  :profile profile}]
+        defaults          {:bearer-token               nil,
+                           :no-report?                 false,
+                           :max-total-requests         max-total-requests,
+                           :report-path                report-path,
+                           :headers                    {:x-route             (str "endpoint=" endpoint-id),
+                                                        :accept              (str "application/json; version=" ooapi-version),
+                                                        :x-envelope-response "false"},
+                           :no-spider?                 false,
+                           :max-requests-per-operation ##Inf,
+                           :spider-timeout-millis      spider-timeout-millis,
+                           :observations-path          observations-path,
+                           :profile                    profile
+                           :runtime-extra              {"Endpoint" endpoint-id}}]
     (try
       (apie/main (merge defaults opts))
       (slurp report-path)

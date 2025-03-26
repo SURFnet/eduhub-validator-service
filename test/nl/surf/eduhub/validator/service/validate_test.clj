@@ -46,9 +46,12 @@
                   :base-url           gateway-url
                   :max-total-requests max-total-requests
                   :ooapi-version      5
-                  :profile       "rio"}
+                  :profile            "rio"
+                  :runtime-extra      {"RuntimeExtra" "Test"}}
             report (validate/validate-endpoint "demo04.test.surfeduhub.nl" opts)]
         (is (str/includes? report
                            "<dt>Number of requests</dt><dd>5</dd>"))
         (is (str/includes? report
-                           "No issues found."))))))
+                           "No issues found."))
+        (is (str/includes? report
+                           "<dt>RuntimeExtra</dt><dd>Test</dd>"))))))
