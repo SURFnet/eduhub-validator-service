@@ -10,9 +10,10 @@
          hiccup/hiccup                               {:mvn/version "2.0.0-RC1"}
          nl.jomco/clj-http-status-codes              {:mvn/version "0.1"}
          nl.jomco/envopts                            {:mvn/version "0.0.4"}
+
          nl.surfnet/eduhub-validator                 {:git/url    "https://github.com/SURFnet/eduhub-validator"
-                                                      :git/sha    "de73d274a16202e02f3491b514a2260b6bee797b"
-                                                      :git/tag    "v0.2.2"}
+                                                      :git/sha    "f0969d34b91e8ad62d7e2912ffa450fc60aa063d"
+                                                      :git/tag    "v0.2.3"}
          nl.jomco/with-resources                     {:mvn/version "0.1.2"}
          org.babashka/http-client                    {:mvn/version "0.4.19"}
          org.babashka/json                           {:mvn/version "0.1.6"}
