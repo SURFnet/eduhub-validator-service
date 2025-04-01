@@ -34,6 +34,11 @@
             :replace-paths []
             :main-opts     ["-m" "uberdeps.uberjar"
                             "--main-class" "nl.surf.eduhub.validator.service.main"]}
-  :repl    {:main-opts ["-i" "src/nl/surf/eduhub/validator/service/main.clj"
-                        "-e" "(in-ns,'nl.surf.eduhub.validator.service.main)"
-                        "-r"]}}}
+  :watson  {:paths        []
+            :replace-deps {io.github.clj-holmes/clj-watson {:git/tag "v6.0.1"
+                                                            :git/sha "b5203518d023d50e70a240d59a0770ccbacf3867"}}
+            :main-opts    ["-m" "clj-watson.cli"]}
+
+  :repl {:main-opts ["-i" "src/nl/surf/eduhub/validator/service/main.clj"
+                     "-e" "(in-ns,'nl.surf.eduhub.validator.service.main)"
+                     "-r"]}}}
