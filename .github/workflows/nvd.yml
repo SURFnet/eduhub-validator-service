@@ -7,7 +7,7 @@ on:
 
 jobs:
   "NVD-check":
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
 
@@ -27,15 +27,18 @@ jobs:
           # the most recent cache for nvd-clojure
           # and update that
           restore-keys: "nvd-clojure-"
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
       - name: Install clj runtime
         run: |
           cd "$HOME"
           curl -L -O https://github.com/clojure/brew-install/releases/latest/download/posix-install.sh
           chmod +x posix-install.sh
           sudo ./posix-install.sh
-
-      - name: Install NVD clojure
-        run: clojure -Ttools install nvd-clojure/nvd-clojure '{:mvn/version "RELEASE"}' :as nvd;
 
       - name: Check that NVD Secret is set
         env:
@@ -45,6 +48,5 @@ jobs:
 
       - name: Check clojure dependencies with NVD
         env:
-          NVD_API_TOKEN: ${{ secrets.NVD_API_TOKEN }}
-        run: clojure -J-Dclojure.main.report=stderr -Sdeps '{:deps {org.owasp/dependency-check-maven {:mvn/version "12.1.0"}}}' -Tnvd nvd.task/check :config-filename '".nvd-config.json"' :classpath "\"$(clojure -Spath)\""
- 
+          CLJ_WATSON_NVD_API_KEY: ${{ secrets.NVD_API_TOKEN }}
+        run: clojure -M:watson scan -p deps.edn -f
