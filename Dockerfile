@@ -13,7 +13,7 @@ COPY . /app/
 RUN make
 RUN make opentelemetry-javaagent.jar
 
-FROM gcr.io/distroless/java21-debian12
+FROM gcr.io/distroless/java21-debian12:nonroot
 COPY --from=builder /app/target/eduhub-validator-service.jar /eduhub-validator-service.jar
 COPY --from=builder /app/opentelemetry-javaagent.jar /opentelemetry-javaagent.jar
 

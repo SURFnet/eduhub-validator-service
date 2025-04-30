@@ -120,6 +120,11 @@ curl -v 'http://localhost:3002/configstatus/demo04.test.surfeduhub.nl'
 curl -v -X POST 'http://localhost:3002/jobs/paths/demo04.test.surfeduhub.nl'
 ```
 
+The image build is *nonroot* variant of *distroless* Debian which runs as:
+
+- *user*: `nonroot` (uid=65532)
+- *group*: `nonroot` (guid=65532)
+
 ## Run locally
 
 ```bash
