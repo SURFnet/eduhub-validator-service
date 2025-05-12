@@ -25,11 +25,10 @@
          compojure/compojure            {:mvn/version "1.7.1"}
          hiccup/hiccup                  {:mvn/version "2.0.0-RC5"}
          nl.jomco/clj-http-status-codes {:mvn/version "0.1"}
-
          nl.jomco/envopts               {:mvn/version "0.0.6"}
          nl.surfnet/eduhub-validator    {:git/url "https://github.com/SURFnet/eduhub-validator"
-                                         :git/sha "f0969d34b91e8ad62d7e2912ffa450fc60aa063d"
-                                         :git/tag "v0.2.3"}
+                                         :git/sha "38fb5271f31462e9f8dc7d181767ef9f7f140a07"
+                                         :git/tag "v0.2.4"}
          nl.jomco/with-resources        {:mvn/version "0.1.2"}
 }
  :aliases
