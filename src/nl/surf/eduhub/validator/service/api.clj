@@ -26,10 +26,18 @@
             [nl.surf.eduhub.validator.service.checker :as checker]
             [nl.surf.eduhub.validator.service.jobs.client :as jobs-client]
             [nl.surf.eduhub.validator.service.jobs.status :as status]
+            [nl.surf.eduhub.validator.service.redis-monitor :as redis-monitor]
             [nl.surf.eduhub.validator.service.views.status :as views.status]
             [ring.middleware.defaults :refer [api-defaults wrap-defaults]]
             [ring.middleware.json :refer [wrap-json-response]]
             [ring.middleware.resource :refer [wrap-resource]]))
+
+(defn- health-handler [config]
+  (try
+    (redis-monitor/check-redis-connection config)
+    {:body "OK" :status http-status/ok}
+    (catch Exception _
+      {:status http-status/service-unavailable})))
 
 ;; Turn the contents of a job status (stored in redis) into an http response.
 (defn- job-status-handler [uuid {:keys [redis-conn] :as _config}]
@@ -71,6 +79,8 @@
 
 (defn public-routes [config]
   (-> (compojure.core/routes
+        (GET "/health" []
+          (health-handler config))
         (GET "/status/:uuid" [uuid]
           (job-status-handler uuid config))
         (GET "/view/report/:uuid" [uuid]
