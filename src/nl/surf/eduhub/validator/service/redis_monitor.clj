@@ -29,7 +29,7 @@
 
 (defn halt-redis-monitor
   [{:keys [thread]}]
-  (.interupt thread)
+  (.interrupt thread)
   (.join thread))
 
 (defn run-redis-monitor
