@@ -4,7 +4,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-.PHONY: lint test check clean
+.PHONY: lint test check clean outdated
 
 default: target/eduhub-validator-service.jar
 
@@ -25,7 +25,10 @@ lint: prep-lint
 test:
 	clojure -M:test
 
-check: lint test
+outdated:
+	clojure -M:outdated
+
+check: lint test outdated
 
 clean:
 	rm -rf classes target
