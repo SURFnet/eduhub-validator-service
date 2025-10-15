@@ -20,7 +20,8 @@
   (:gen-class)
   (:require [babashka.http-client :as http]
             [clojure.tools.logging :as log]
-            [nl.jomco.apie.main :as apie])
+            [nl.jomco.apie.main :as apie]
+            [nl.surf.eduhub.validator.service.logging :as logging])
   (:import [clojure.lang ExceptionInfo]
            [java.io File]))
 
@@ -36,7 +37,7 @@
                   :basic-auth gateway-basic-auth
                   :throw      false}
         response (http/get url opts)]
-    (log/info (str (:status response) " :get " url opts))
+    (log/info (str (:status response) " :get " url (logging/redact-sensitive opts)))
     response))
 
 ;; Uses the ooapi validator to validate an endpoint.
@@ -67,7 +68,7 @@
       (slurp report-path)
       (catch ExceptionInfo ex
         (when-let [dr (:during-request (ex-data ex))]
-          (log/error ex (str "Timeout during request " (prn-str dr))))
+          (log/error ex (str "Timeout during request " (prn-str (logging/redact-sensitive dr)))))
         (throw ex))
       (finally
         (.delete observations-file)
