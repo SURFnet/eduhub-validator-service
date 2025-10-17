@@ -1,13 +1,13 @@
 {:paths ["src" "test" "resources" "classes"]
- :deps  {org.clojure/clojure      {:mvn/version "1.12.1"}
+ :deps  {org.clojure/clojure      {:mvn/version "1.12.3"}
          org.clojure/core.memoize {:mvn/version "1.1.266"}
 
          org.clojure/tools.logging                   {:mvn/version "1.3.0"}
-         ch.qos.logback/logback-classic              {:mvn/version "1.5.18"}
+         ch.qos.logback/logback-classic              {:mvn/version "1.5.19"}
          ch.qos.logback.contrib/logback-json-classic {:mvn/version "0.1.5"}
          ch.qos.logback.contrib/logback-jackson      {:mvn/version "0.1.5"}
-         com.fasterxml.jackson.core/jackson-databind {:mvn/version "2.19.2"}
-         cheshire/cheshire                           {:mvn/version "6.0.0"}
+         com.fasterxml.jackson.core/jackson-databind {:mvn/version "2.20.0"}
+         cheshire/cheshire                           {:mvn/version "6.1.0"}
 
          com.taoensso/carmine     {:mvn/version "3.4.1"}
          com.nilenso/goose        {:mvn/version "0.6.0"
@@ -18,17 +18,17 @@
          org.babashka/json        {:mvn/version "0.1.6"}
 
          ring/ring-codec                {:mvn/version "1.3.0"}
-         ring/ring-core                 {:mvn/version "1.14.2"}
-         ring/ring-defaults             {:mvn/version "0.6.0"}
-         ring/ring-jetty-adapter        {:mvn/version "1.14.2"}
+         ring/ring-core                 {:mvn/version "1.15.3"}
+         ring/ring-defaults             {:mvn/version "0.7.0"}
+         ring/ring-jetty-adapter        {:mvn/version "1.15.3"}
          ring/ring-json                 {:mvn/version "0.5.1"}
-         compojure/compojure            {:mvn/version "1.7.1"}
+         compojure/compojure            {:mvn/version "1.7.2"}
          hiccup/hiccup                  {:mvn/version "2.0.0"}
          nl.jomco/clj-http-status-codes {:mvn/version "0.2"}
-         nl.jomco/envopts               {:mvn/version "0.0.6"}
+         nl.jomco/envopts               {:mvn/version "0.0.7"}
          nl.surfnet/eduhub-validator    {:git/url "https://github.com/SURFnet/eduhub-validator"
-                                         :git/sha "0a58ab3acdce6201c30aa1cad9e7768a857432cc"
-                                         :git/tag "v1.0.0"}
+                                         :git/sha "c788aab7a859ec8eef10751b57d775acd4836696"
+                                         :git/tag "v1.0.3"}
          nl.jomco/with-resources        {:mvn/version "0.1.2"}
          }
  :aliases
