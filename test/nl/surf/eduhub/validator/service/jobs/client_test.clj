@@ -55,7 +55,7 @@
                                          (get @status-atom id))]
         ;; make endpoint call
         (let [resp (app {:uri "/jobs/paths/google.com" :request-method :post})]
-          (is (= {:headers {"Content-Type" "application/json; charset=utf-8"}, :status 200}
+          (is (= {:headers {"Content-Type" "application/json; charset=utf-8", "Content-Length" "153"}, :status 200}
                  (select-keys resp [:headers :status])))
           ;; assert status OK
           (is (= http-status/ok (:status resp)))

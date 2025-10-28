@@ -4,8 +4,7 @@
             [nl.jomco.resources :refer [defresource close]]
             [nl.surf.eduhub.validator.service.jobs.client :as client]
             [clojure.tools.logging :as log]
-            [environ.core :refer [env]]
-            [goose.client :as gc])
+            [environ.core :refer [env]])
   (:import (org.slf4j LoggerFactory)
            (ch.qos.logback.classic Level)))
 

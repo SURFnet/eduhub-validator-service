@@ -78,9 +78,6 @@
           (assoc value-key (str/trim (slurp path)))
           (dissoc file-key)))))
 
-(defn job-error-handler [_cfg _job ex]
-  (log/error ex "Error in job"))
-
 (defn add-goose-config
   [[config errs]]
   (if errs
