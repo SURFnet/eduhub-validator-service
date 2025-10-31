@@ -37,7 +37,7 @@
                   :basic-auth gateway-basic-auth
                   :throw      false}
         response (http/get url opts)]
-    (log/info (str (:status response) " :get " url (logging/redact-sensitive opts)))
+    (log/info (str (:status response) " :get " url) (logging/redact-sensitive opts))
     response))
 
 ;; Uses the ooapi validator to validate an endpoint.
