@@ -55,3 +55,24 @@
                            "No issues found."))
         (is (str/includes? report
                            "<dt>RuntimeExtra</dt><dd>Test</dd>"))))))
+
+(deftest check-endpoint-path-resolution
+  (let [captured   (atom nil)
+        base-config {:gateway-url                "https://gateway.test.surfeduhub.nl"
+                     :gateway-basic-auth         {:user "u" :pass "p"}
+                     :ooapi-version              "5"
+                     :check-endpoint-path        "/courses"}]
+    (with-redefs [http/get (fn [url opts]
+                             (reset! captured {:url url :opts opts})
+                             {:status 200 :body ""})]
+      (reset! captured nil)
+      (validate/check-endpoint "endpoint.test" nil base-config)
+      (is (= "https://gateway.test.surfeduhub.nl/courses" (:url @captured)))
+
+      (reset! captured nil)
+      (validate/check-endpoint "endpoint.test" nil (assoc base-config :check-endpoint-path "/programs"))
+      (is (= "https://gateway.test.surfeduhub.nl/programs" (:url @captured)))
+
+      (reset! captured nil)
+      (validate/check-endpoint "endpoint.test" "/custom/123" base-config)
+      (is (= "https://gateway.test.surfeduhub.nl/custom/123" (:url @captured))))))

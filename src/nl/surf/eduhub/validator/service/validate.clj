@@ -28,9 +28,10 @@
 ;; Validates whether the endpoint is working and reachable at all.
 (defn check-endpoint
   "Performs a synchronous validation via the eduhub-validator"
-  [endpoint-id {:keys [gateway-url gateway-basic-auth ooapi-version] :as _config}]
+  [endpoint-id custom-path {:keys [gateway-url gateway-basic-auth ooapi-version check-endpoint-path] :as _config}]
   {:pre [gateway-url]}
-  (let [url      (str gateway-url (if (.endsWith gateway-url "/") "" "/") "courses")
+  (let [path     (or custom-path check-endpoint-path "courses")
+        url      (str gateway-url (if (.endsWith gateway-url "/") "" "/") (if (.startsWith path "/") (subs path 1) path))
         opts     {:headers    {"x-route"             (str "endpoint=" endpoint-id)
                                "accept"              (str "application/json; version=" ooapi-version)
                                "x-envelope-response" "true"}

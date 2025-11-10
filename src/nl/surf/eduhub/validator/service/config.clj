@@ -30,6 +30,9 @@
 (def opt-specs
   {:gateway-url                        ["URL of gateway" :str
                                         :in [:gateway-url]]
+   :check-endpoint-path                ["Default path used for config status checks" :str
+                                        :default "/courses"
+                                        :in [:check-endpoint-path]]
    :gateway-basic-auth-user            ["Basic auth username of gateway" :str
                                         :in [:gateway-basic-auth :user]]
    :gateway-basic-auth-pass            ["Basic auth password of gateway" :str

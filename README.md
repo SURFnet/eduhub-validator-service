@@ -11,6 +11,11 @@ Perform basic checks on whether the endpoint is up.
 Calls the endpoint with `endpointId` through the Eduhub gateway and
 reports if a successful response is received.
 
+The gateway path defaults to `/courses` but can be customised with the
+`CHECK_ENDPOINT_PATH` environment variable. Provide a `path`
+query parameter to temporarily override the default, e.g.
+`GET /configstatus/{endpointId}?path=/programs`.
+
 On success, responds with a `200 OK` status
 
 On error, responds with a `502 Bad Gateway` status.
@@ -71,6 +76,7 @@ SURF_CONEXT_CLIENT_SECRET           SurfCONEXT client secret for validation serv
 SURF_CONEXT_INTROSPECTION_ENDPOINT  SurfCONEXT introspection endpoint
 ALLOWED_CLIENT_IDS                  Comma separated list of allowed SurfCONEXT client ids. 
 MAX_TOTAL_REQUESTS                  Maximum number of requests that validator is allowed to make before raising an error
+CHECK_ENDPOINT_PATH                 Default path used when checking `/configstatus/{endpointId}` (defaults to `/courses`).
 OOAPI_VERSION                       Ooapi version to pass through to gateway
 SERVER_PORT                         Starts the app server on this port
 REDIS_URI                           URI to redis
@@ -131,8 +137,8 @@ The image build is *nonroot* variant of *distroless* Debian which runs as:
 make
 java -jar target/eduhub-validator-service.jar
 # Extract ACCESS_TOKEN
-curl -s -X POST https://connect.test.surfconext.nl/oidc/token -u client01.registry.validator.dev.surfeduhub.nl:$SURF_CONEXT_PASSWORD -d "grant_type=client_credentials"
-curl -v -X POST 'http://localhost:3002/jobs/paths/demo04.test.surfeduhub.nl?profile=rio' -H "Authorization: Bearer $ACCESS_TOKEN" 
+curl -s -X POST https://connect.test.surfconext.nl/oidc/token -u :$SURF_CONEXT_CLIENT_SECRET -d "grant_type=client_credentials"
+curl -v -X POST 'http://localhost:3002/jobs/paths/demo04.test.surfeduhub.nl?profile=rio' -H "Authorization: Bearer $ACCESS_TOKEN"
 ```
 
 ## Notes
