@@ -21,6 +21,7 @@
             [babashka.json :as json]
             [nl.jomco.http-status-codes :as status]
             [nl.surf.eduhub.validator.service.checker :as checker]
+            [nl.surf.eduhub.validator.service.validate :as validate]
             [clojure.test :refer [deftest is]]))
 
 
@@ -28,7 +29,7 @@
   (with-redefs [http/request (fn [_]
                                (update gateway-response
                                        :body json/write-str))]
-    (checker/check-endpoint endpoint-id {:gateway-url "http://localhost"})))
+    (checker/check-endpoint endpoint-id nil {:gateway-url "http://localhost"})))
 
 (deftest test-validate-correct
   (is (= {:status status/ok :body {:valid true}}
@@ -54,3 +55,13 @@
   (is (= {:status status/internal-server-error :body {}}
          (result "google.com"
                  {:status status/unauthorized :body "mocked response"}))))
+
+(deftest check-endpoint-forwards-path
+  (let [captured (atom nil)
+        endpoint-id "google.com"]
+    (with-redefs [validate/check-endpoint (fn [eid path _config]
+                                            (reset! captured {:endpoint eid :path path})
+                                            {:status status/ok
+                                             :body   (json/write-str {:gateway {:endpoints {(keyword eid) {:responseCode status/ok}}}})})]
+      (checker/check-endpoint endpoint-id "/programs" {:gateway-url "http://localhost"})
+      (is (= {:endpoint endpoint-id :path "/programs"} @captured)))))

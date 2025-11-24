@@ -41,6 +41,7 @@
   {:allowed-client-ids         "default",
    :gateway-url                "https://gateway.test.surfeduhub.nl/",
    :ooapi-version              "default",
+   :check-endpoint-path        "/courses",
    :gateway-basic-auth         {:pass "default", :user "john200"},
    :introspection-basic-auth   {:pass "default", :user "default"},
    :introspection-endpoint-url "default"
