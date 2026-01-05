@@ -19,13 +19,13 @@
         key (status-key uuid)]
     (car/wcar redis-conn (car/hmset* key v))
     (when expires-in-seconds
-      (car/wcar redis-conn #_:clj-kondo/ignore (car/expire key expires-in-seconds)))))
+      (car/wcar redis-conn (car/expire key expires-in-seconds)))))
 
 ;; Loads the job status as a clojure map for the job with given uuid.
 (defn load-status [redis-conn uuid]
-  (let [result (car/wcar redis-conn #_:clj-kondo/ignore (car/hgetall (status-key uuid)))]
+  (let [result (car/wcar redis-conn (car/hgetall (status-key uuid)))]
     (when-not (empty? result)
       (update-keys (apply hash-map result) keyword))))
 
 (defn delete-status [redis-conn uuid]
-  (car/wcar redis-conn #_:clj-kondo/ignore (car/del (status-key uuid))))
+  (car/wcar redis-conn (car/del (status-key uuid))))
