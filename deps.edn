@@ -12,7 +12,6 @@
          com.taoensso/carmine     {:mvn/version "3.5.0"}
          com.nilenso/goose        {:mvn/version "0.6.0"
                                    :exclusions  [com.rabbitmq/amqp-client]}
-         com.rabbitmq/amqp-client {:mvn/version "5.28.0"}
 
          org.babashka/http-client {:mvn/version "0.4.23"}
          org.babashka/json        {:mvn/version "0.1.6"}
