@@ -4,6 +4,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+DOCKER=docker
+
 .PHONY: lint test check clean outdated
 
 default: target/eduhub-validator-service.jar
@@ -39,4 +41,4 @@ opentelemetry-javaagent.jar:
 .PHONY: docker-build test lint check
 
 docker-build: Dockerfile docker-compose.yml opentelemetry-javaagent.jar
-	docker compose build
+	$(DOCKER) compose build
