@@ -49,4 +49,4 @@ jobs:
       - name: Check clojure dependencies with NVD
         env:
           CLJ_WATSON_NVD_API_KEY: ${{ secrets.NVD_API_TOKEN }}
-        run: clojure -M:watson scan -p deps.edn -f
+        run: make nvd

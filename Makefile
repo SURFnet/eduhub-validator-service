@@ -6,8 +6,6 @@
 
 DOCKER=docker
 
-.PHONY: lint test check clean outdated
-
 default: target/eduhub-validator-service.jar
 
 classes/nl/surf/eduhub/validator/service/main.class: src/nl/surf/eduhub/validator/service/main.clj
@@ -32,13 +30,16 @@ outdated:
 
 check: lint test outdated
 
+nvd:
+	clojure -M:watson scan -p deps.edn -f -s -w .watson.properties
+
 clean:
 	rm -rf classes target
 
 opentelemetry-javaagent.jar:
 	curl -L https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar -o $@
 
-.PHONY: docker-build test lint check
-
 docker-build: Dockerfile docker-compose.yml opentelemetry-javaagent.jar
 	$(DOCKER) compose build
+
+.PHONY: check clean docker-build lint nvd outdated test
