@@ -26,8 +26,8 @@
          nl.jomco/clj-http-status-codes {:mvn/version "0.2"}
          nl.jomco/envopts               {:mvn/version "0.0.7"}
          nl.surfnet/eduhub-validator    {:git/url "https://github.com/SURFnet/eduhub-validator"
-                                         :git/sha "a69a35d0e237e8e0c2fbfd788a105c2c4311b28a"
-                                         :git/tag "v1.0.6"}
+                                         :git/sha "ef3dd5cc1c16328eaf845628888237d5c8dfcbff"
+                                         :git/tag "v1.0.7"}
          nl.jomco/with-resources        {:mvn/version "0.1.2"}
          }
  :aliases
