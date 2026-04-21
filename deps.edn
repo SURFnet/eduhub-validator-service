@@ -16,6 +16,27 @@
          ;; Fixes CVE-2025-67721
          io.airlift/aircompressor {:mvn/version "2.0.3"}
 
+         ;; Override transitive dep via carmine/nippy to fix CVE-2025-67721
+         io.airlift/aircompressor {:mvn/version "2.0.3"}
+
+         ;; Override transitive Jetty 12.1.0 deps via ring-jetty-adapter to
+         ;; a consistent patched 12.1.6 (fixes CVE-2025-11143, CVE-2026-1605)
+         org.eclipse.jetty.websocket/jetty-websocket-core-server      {:mvn/version "12.1.6"}
+         org.eclipse.jetty.websocket/jetty-websocket-core-common      {:mvn/version "12.1.6"}
+         org.eclipse.jetty/jetty-xml                                  {:mvn/version "12.1.6"}
+         org.eclipse.jetty/jetty-unixdomain-server                    {:mvn/version "12.1.6"}
+         org.eclipse.jetty/jetty-security                             {:mvn/version "12.1.6"}
+         org.eclipse.jetty/jetty-session                              {:mvn/version "12.1.6"}
+         org.eclipse.jetty.ee9/jetty-ee9-servlet                      {:mvn/version "12.1.6"}
+         org.eclipse.jetty.ee9/jetty-ee9-nested                       {:mvn/version "12.1.6"}
+         org.eclipse.jetty.ee9/jetty-ee9-security                     {:mvn/version "12.1.6"}
+         org.eclipse.jetty.ee9/jetty-ee9-webapp                       {:mvn/version "12.1.6"}
+         org.eclipse.jetty.ee/jetty-ee-webapp                         {:mvn/version "12.1.6"}
+         org.eclipse.jetty.ee9.websocket/jetty-ee9-websocket-jetty-server {:mvn/version "12.1.6"}
+         org.eclipse.jetty.ee9.websocket/jetty-ee9-websocket-jetty-common {:mvn/version "12.1.6"}
+         org.eclipse.jetty.ee9.websocket/jetty-ee9-websocket-jetty-api    {:mvn/version "12.1.6"}
+         org.eclipse.jetty.ee9.websocket/jetty-ee9-websocket-servlet      {:mvn/version "12.1.6"}
+
          org.babashka/http-client {:mvn/version "0.4.23"}
          org.babashka/json        {:mvn/version "0.1.6"}
 
