@@ -49,7 +49,7 @@
                             "--main-class" "nl.surf.eduhub.validator.service.main"]}
   :watson  {:paths        []
             :replace-deps {io.github.clj-holmes/clj-watson {:git/tag "v6.1.0"
-                                                            :git/sha "63aee3868a807fa71ad43ec67b3cec2807c7a74e"}
+                                                            :git/sha "be98e4db74fb8927db4825cc73bbe2606e44e5e3"}
                            org.owasp/dependency-check-core {:mvn/version "RELEASE"}}
             :main-opts    ["-m" "clj-watson.cli"]}
 
