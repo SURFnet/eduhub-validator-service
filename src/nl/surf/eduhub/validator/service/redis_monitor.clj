@@ -49,5 +49,5 @@
         thread (Thread. monitor)]
     (.setName thread "redis-connection-monitor")
     (.setDaemon thread true)
-    (.run thread)
+    (.start thread)
     (closeable {:thread thread} halt-redis-monitor)))
