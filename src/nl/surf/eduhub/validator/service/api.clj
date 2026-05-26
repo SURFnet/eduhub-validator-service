@@ -134,10 +134,21 @@
                       (str "Exception handling "  (:request-method request) " " (:uri request) ": " (ex-message e)))
            (throw e)))))
 
+(defn wrap-error-page
+  "Catch exceptions and return minimal error page."
+  [handler]
+  (fn [request]
+    (try (handler request)
+         (catch Exception _e
+           {:status http-status/internal-server-error
+            :headers {"content-type" "text/plain"}
+            :body "Internal Server Error"}))))
+
 ;; Compose the app from the routes and the wrappers. Authentication can be disabled for testing purposes.
 (defn compose-app [config auth-disabled]
   (-> (compojure.core/routes
        (public-routes config)
        (private-routes config auth-disabled)
        (route/not-found "Not Found"))
-      (wrap-log)))
+      (wrap-log)
+      (wrap-error-page)))
