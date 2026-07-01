@@ -1,7 +1,6 @@
 name: Check deps for vulnerabilities
 
 on:
-  push:
   workflow_call:
   schedule:
     - cron: '0 1 * * 1' # every monday

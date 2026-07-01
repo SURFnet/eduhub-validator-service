@@ -28,7 +28,7 @@ test:
 outdated:
 	clojure -M:outdated
 
-check: lint test outdated
+check: lint test
 
 export CLJ_WATSON_NVD_API_KEY=dummy # note: required but not used
 export CLJ_WATSON_NVD_API_DATAFEED_URL=https://dependency-check.github.io/DependencyCheck_Builder/nvd_cache/nvdcve-{0}.json.gz
