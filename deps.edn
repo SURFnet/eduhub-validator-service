@@ -3,10 +3,10 @@
          org.clojure/core.memoize {:mvn/version "1.2.281"}
 
          org.clojure/tools.logging                   {:mvn/version "1.3.1"}
-         ch.qos.logback/logback-classic              {:mvn/version "1.5.37"}
+         ch.qos.logback/logback-classic              {:mvn/version "1.5.38"}
          ch.qos.logback.contrib/logback-json-classic {:mvn/version "0.1.5"}
          ch.qos.logback.contrib/logback-jackson      {:mvn/version "0.1.5"}
-         com.fasterxml.jackson.core/jackson-databind {:mvn/version "2.22.0"}
+         com.fasterxml.jackson.core/jackson-databind {:mvn/version "2.22.1"}
          cheshire/cheshire                           {:mvn/version "6.2.0"}
 
          com.nilenso/goose    {:mvn/version "0.6.0"
