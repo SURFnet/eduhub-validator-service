@@ -5,4 +5,10 @@
     <packageUrl regex="true">.*openapi-v3-validator.*</packageUrl>
     <cve>CVE-2025-15104</cve>
   </suppress>
+
+  <suppress>
+    <notes>Transient dependency for RabbitMQ support but not used in this project.</notes>
+    <cve>CVE-2026-54399</cve>
+    <cve>CVE-2026-54428</cve>
+  </suppress>
 </suppressions>
