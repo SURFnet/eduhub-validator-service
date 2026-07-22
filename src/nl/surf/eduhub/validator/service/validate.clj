@@ -28,12 +28,14 @@
 ;; Validates whether the endpoint is working and reachable at all.
 (defn check-endpoint
   "Performs a synchronous validation via the eduhub-validator"
-  [endpoint-id custom-path {:keys [gateway-url gateway-basic-auth ooapi-version check-endpoint-path] :as _config}]
+  [endpoint-id custom-path oeapi-version {:keys [gateway-url gateway-basic-auth check-endpoint-path] :as _config}]
   {:pre [gateway-url]}
   (let [path     (or custom-path check-endpoint-path "courses")
         url      (str gateway-url (if (.endsWith gateway-url "/") "" "/") (if (.startsWith path "/") (subs path 1) path))
         opts     {:headers    {"x-route"             (str "endpoint=" endpoint-id)
-                               "accept"              (str "application/json; version=" ooapi-version)
+                               "accept"              (if (= 5 oeapi-version)
+                                                       (str "application/json; version=" oeapi-version)
+                                                       (str "application/vnd.oeapi+json;version=" oeapi-version))
                                "x-envelope-response" "true"}
                   :basic-auth gateway-basic-auth
                   :throw      false}
@@ -45,8 +47,8 @@
 ;; Returns the generated HTML report.
 (defn validate-endpoint
   "Returns the HTML validation report as a String."
-  [endpoint-id {:keys [basic-auth ooapi-version max-total-requests base-url profile spider-timeout-millis] :as opts}]
-  {:pre [endpoint-id basic-auth ooapi-version base-url profile]}
+  [endpoint-id {:keys [basic-auth max-total-requests base-url profile spider-timeout-millis] :as opts}]
+  {:pre [endpoint-id basic-auth base-url profile]}
   (let [report-file       (File/createTempFile "report" ".html")
         report-path       (.getAbsolutePath report-file)
         observations-file (File/createTempFile "observations" ".edn")
@@ -56,7 +58,6 @@
                            :max-total-requests         max-total-requests,
                            :report-path                report-path,
                            :headers                    {:x-route             (str "endpoint=" endpoint-id),
-                                                        :accept              (str "application/json; version=" ooapi-version),
                                                         :x-envelope-response "false"},
                            :no-spider?                 false,
                            :max-requests-per-operation ##Inf,

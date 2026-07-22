@@ -45,7 +45,6 @@
       (let [opts {:basic-auth         gateway-basic-auth
                   :base-url           gateway-url
                   :max-total-requests max-total-requests
-                  :ooapi-version      5
                   :profile            "rio"
                   :runtime-extra      {"RuntimeExtra" "Test"}}
             report (validate/validate-endpoint "demo04.test.surfeduhub.nl" opts)]
@@ -60,19 +59,18 @@
   (let [captured   (atom nil)
         base-config {:gateway-url                "https://gateway.test.surfeduhub.nl"
                      :gateway-basic-auth         {:user "u" :pass "p"}
-                     :ooapi-version              "5"
                      :check-endpoint-path        "/courses"}]
     (with-redefs [http/get (fn [url opts]
                              (reset! captured {:url url :opts opts})
                              {:status 200 :body ""})]
       (reset! captured nil)
-      (validate/check-endpoint "endpoint.test" nil base-config)
+      (validate/check-endpoint "endpoint.test" nil "5" base-config)
       (is (= "https://gateway.test.surfeduhub.nl/courses" (:url @captured)))
 
       (reset! captured nil)
-      (validate/check-endpoint "endpoint.test" nil (assoc base-config :check-endpoint-path "/programs"))
+      (validate/check-endpoint "endpoint.test" nil "6" (assoc base-config :check-endpoint-path "/programs"))
       (is (= "https://gateway.test.surfeduhub.nl/programs" (:url @captured)))
 
       (reset! captured nil)
-      (validate/check-endpoint "endpoint.test" "/custom/123" base-config)
+      (validate/check-endpoint "endpoint.test" "/custom/123" nil base-config)
       (is (= "https://gateway.test.surfeduhub.nl/custom/123" (:url @captured))))))

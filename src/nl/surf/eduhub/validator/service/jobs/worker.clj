@@ -37,7 +37,7 @@
 
 ;; Runs the validate-endpoint function
 ;; and updates the values in the job status.
-;; opts should contain: basic-auth ooapi-version base-url profile
+;; opts should contain: basic-auth base-url profile
 
 (defn validate-endpoint
   [endpoint-id uuid opts]

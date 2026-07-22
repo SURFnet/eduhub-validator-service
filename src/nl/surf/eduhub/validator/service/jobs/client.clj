@@ -10,13 +10,12 @@
 
 ;; Enqueue the validate-endpoint call in the worker queue.
 (defn enqueue-validation
-  [endpoint-id profile {:keys [redis-conn gateway-basic-auth gateway-url ooapi-version max-total-requests root-url goose-client-opts] :as _config}]
+  [endpoint-id profile {:keys [redis-conn gateway-basic-auth gateway-url max-total-requests root-url goose-client-opts] :as _config}]
   (let [uuid (str (UUID/randomUUID))
         prof (or profile "ooapi")
         opts {:basic-auth         gateway-basic-auth
               :base-url           gateway-url
               :max-total-requests max-total-requests
-              :ooapi-version      ooapi-version
               :profile            prof}]
     (status/set-status-fields redis-conn uuid "pending" {:endpoint-id endpoint-id, :profile prof} nil)
     (c/perform-async goose-client-opts `worker/validate-endpoint endpoint-id uuid opts)

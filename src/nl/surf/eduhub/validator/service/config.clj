@@ -55,8 +55,6 @@
                                         :in [:expiry-seconds]]
    :validator-service-root-url         ["Root url for the web view; does not include path" :str
                                         :in [:root-url]]
-   :ooapi-version                      ["Ooapi version to pass through to gateway" :str
-                                        :in [:ooapi-version]]
    :spider-timeout-millis              ["Maximum number of milliseconds before spider timeout." :int
                                         :default 3600000
                                         :in [:spider-timeout-millis]]})

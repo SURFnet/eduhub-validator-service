@@ -28,7 +28,6 @@
                   :gateway-basic-auth-pass            "default",
                   :gateway-url                        "https://gateway.test.surfeduhub.nl/",
                   :max-total-requests                 "5",
-                  :ooapi-version                      "default",
                   :redis-uri                          "redis://example.com"
                   :surf-conext-client-id              "default",
                   :surf-conext-client-secret          "default",
@@ -40,7 +39,6 @@
 (def default-expected-value
   {:allowed-client-ids         "default",
    :gateway-url                "https://gateway.test.surfeduhub.nl/",
-   :ooapi-version              "default",
    :check-endpoint-path        "/courses",
    :gateway-basic-auth         {:pass "default", :user "john200"},
    :introspection-basic-auth   {:pass "default", :user "default"},
