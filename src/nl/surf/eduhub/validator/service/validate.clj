@@ -33,7 +33,7 @@
   (let [path     (or custom-path check-endpoint-path "courses")
         url      (str gateway-url (if (.endsWith gateway-url "/") "" "/") (if (.startsWith path "/") (subs path 1) path))
         opts     {:headers    {"x-route"             (str "endpoint=" endpoint-id)
-                               "accept"              (if (= 5 oeapi-version)
+                               "accept"              (if (= "5" oeapi-version)
                                                        (str "application/json; version=" oeapi-version)
                                                        (str "application/vnd.oeapi+json;version=" oeapi-version))
                                "x-envelope-response" "true"}
