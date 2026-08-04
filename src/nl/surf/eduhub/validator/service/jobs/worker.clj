@@ -28,6 +28,7 @@
   the system configuration that was used to start the worker
   resource."
   [{:keys [goose-worker-opts] :as config}]
+  (log/info "Starting Goose validation worker")
   (-> goose-worker-opts
       (assoc :middlewares (wrap-worker-config config))
       goose.worker/start
@@ -41,13 +42,30 @@
 
 (defn validate-endpoint
   [endpoint-id uuid opts]
-  (let [{:keys [redis-conn expiry-seconds]} *config*]
-    (assert redis-conn)
+  (let [started-at (System/nanoTime)
+        profile    (:profile opts)]
+    (log/infof "Worker received validation job uuid=%s endpoint-id=%s profile=%s"
+               uuid endpoint-id profile)
     (try
-      (let [html (validate/validate-endpoint endpoint-id opts)]
-        ;; assuming everything went ok, save html in status, update status and set expiry to value configured in ENV
-        (status/set-status-fields redis-conn uuid "finished" {"html-report" html} expiry-seconds))
+      (let [{:keys [redis-conn expiry-seconds]} *config*]
+        (when-not redis-conn
+          (throw (ex-info "Worker Redis connection is not configured" {})))
+        (log/infof "Starting endpoint validation uuid=%s endpoint-id=%s profile=%s"
+                   uuid endpoint-id profile)
+        (let [html (validate/validate-endpoint endpoint-id opts)]
+          ;; assuming everything went ok, save html in status, update status and set expiry to value configured in ENV
+          (status/set-status-fields redis-conn uuid "finished" {"html-report" html} expiry-seconds)
+          (log/infof "Finished validation job uuid=%s endpoint-id=%s profile=%s duration-ms=%d"
+                     uuid endpoint-id profile
+                     (long (/ (- (System/nanoTime) started-at) 1000000)))))
       (catch Exception ex
-        ;; otherwise set status to error, include error message and also set expiry
-        (log/error ex "Validate endpoint threw an exception")
-        (status/set-status-fields redis-conn uuid "failed" {"error" (str ex)} expiry-seconds)))))
+        (log/error ex (format "Validation job failed uuid=%s endpoint-id=%s profile=%s duration-ms=%d"
+                              uuid endpoint-id profile
+                              (long (/ (- (System/nanoTime) started-at) 1000000))))
+        ;; Config/Redis failures cannot always be persisted, so protect this update and
+        ;; retain the original exception in the logs.
+        (when-let [redis-conn (:redis-conn *config*)]
+          (try
+            (status/set-status-fields redis-conn uuid "failed" {"error" (str ex)} (:expiry-seconds *config*))
+            (catch Exception status-ex
+              (log/error status-ex (format "Could not store failed status for validation job uuid=%s" uuid)))))))))
