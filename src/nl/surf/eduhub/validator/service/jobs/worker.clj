@@ -28,7 +28,9 @@
   the system configuration that was used to start the worker
   resource."
   [{:keys [goose-worker-opts] :as config}]
-  (log/info "Starting Goose validation worker")
+  (log/infof "Starting Goose validation worker queue=%s threads=%s"
+             (:queue goose-worker-opts)
+             (:threads goose-worker-opts))
   (-> goose-worker-opts
       (assoc :middlewares (wrap-worker-config config))
       goose.worker/start

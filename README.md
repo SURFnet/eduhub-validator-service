@@ -30,8 +30,8 @@ Use the validator to validate the endpoint and generate a report.
 
 ### Fetch Status
 
-Load the current status as json. Fields include job-status (pending, finished or failed), endpoint-id, profile, 
-pending-at and finished-at, with ISO-8601 timestamp format. 
+Load the current status as json. Fields include job-status (pending, finished or failed), endpoint-id, profile,
+pending-at and finished-at, with ISO-8601 timestamp format.
 
 `GET /status/{uuid}`
 
@@ -74,12 +74,13 @@ GATEWAY_BASIC_AUTH_PASS             Password for gateway
 SURF_CONEXT_CLIENT_ID               SurfCONEXT client id for validation service
 SURF_CONEXT_CLIENT_SECRET           SurfCONEXT client secret for validation service
 SURF_CONEXT_INTROSPECTION_ENDPOINT  SurfCONEXT introspection endpoint
-ALLOWED_CLIENT_IDS                  Comma separated list of allowed SurfCONEXT client ids. 
+ALLOWED_CLIENT_IDS                  Comma separated list of allowed SurfCONEXT client ids.
 MAX_TOTAL_REQUESTS                  Maximum number of requests that validator is allowed to make before raising an error
 CHECK_ENDPOINT_PATH                 Default path used when checking `/configstatus/{endpointId}` (defaults to `/courses`).
 OOAPI_VERSION                       Ooapi version to pass through to gateway
 SERVER_PORT                         Starts the app server on this port
 REDIS_URI                           URI to redis
+VALIDATOR_INSTANCE_NAME             Unique name for the validator instance - needed when multiple validator services share a redis instance
 JOB_STATUS_EXPIRY_SECONDS           Number of seconds before job status in Redis expires
 SPIDER_TIMEOUT_MILLIS               Maximum number of milliseconds before spider timeout.
 VALIDATOR_SERVICE_ROOT_URL          The root url of the web endpoint, used to generate a url to a status view. This url is included in the json output after starting a validation job as "web-url".
