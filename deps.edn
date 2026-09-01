@@ -30,7 +30,8 @@
          nl.jomco/clj-http-status-codes {:mvn/version "0.2"}
          nl.jomco/envopts               {:mvn/version "0.0.7"}
          nl.surfnet/eduhub-validator    {:git/url "https://github.com/SURFnet/eduhub-validator"
-                                         :git/sha "6915d55ec3461fb84c81d92e38b6b6a541193795"}
+                                         :git/sha "a3d7b9a539c2df516afd111920c54a21ea5378a6"
+                                         :git/tag "v1.1.1"}
          nl.jomco/with-resources        {:mvn/version "0.1.2"}}
  :aliases
  {:test {:extra-deps {lambdaisland/kaocha {:mvn/version "RELEASE"}}
