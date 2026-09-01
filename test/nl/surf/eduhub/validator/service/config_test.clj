@@ -28,7 +28,6 @@
                   :gateway-basic-auth-pass            "default",
                   :gateway-url                        "https://gateway.test.surfeduhub.nl/",
                   :max-total-requests                 "5",
-                  :ooapi-version                      "default",
                   :redis-uri                          "redis://example.com"
                   :surf-conext-client-id              "default",
                   :surf-conext-client-secret          "default",
@@ -40,7 +39,6 @@
 (def default-expected-value
   {:allowed-client-ids         "default",
    :gateway-url                "https://gateway.test.surfeduhub.nl/",
-   :ooapi-version              "default",
    :check-endpoint-path        "/courses",
    :gateway-basic-auth         {:pass "default", :user "john200"},
    :introspection-basic-auth   {:pass "default", :user "default"},
@@ -52,14 +50,14 @@
    :root-url                   "http://localhost:3002"
    :spider-timeout-millis      3600000
    :goose-worker-opts          {:threads               5,
-                                :queue                 "default",
+                                :queue                 "shared-validator-service",
                                 :graceful-shutdown-sec 30,
                                 :broker
                                 (broker/map->Redis
                                  {:redis-conn nil,
                                   :opts
                                   {:url "redis://example.com", :scheduler-polling-interval-sec 5}})},
-   :goose-client-opts          {:queue "default",
+   :goose-client-opts          {:queue "shared-validator-service",
                                 :retry-opts
                                 {:max-retries            27,
                                  :retry-delay-sec-fn-sym `goose.retry/default-retry-delay-sec,
@@ -73,7 +71,8 @@
                                                     {:spec {:uri "redis://example.com"},
                                                      :pool
                                                      {:max-total-per-key 5, :max-idle-per-key 5, :min-idle-per-key 1}},
-                                                    :opts nil})}})
+                                                    :opts nil})}
+   :validator-instance-name "shared-validator-service"})
 
 (defn- test-env [env]
   (-> default-env

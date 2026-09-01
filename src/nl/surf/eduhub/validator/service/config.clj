@@ -55,8 +55,9 @@
                                         :in [:expiry-seconds]]
    :validator-service-root-url         ["Root url for the web view; does not include path" :str
                                         :in [:root-url]]
-   :ooapi-version                      ["Ooapi version to pass through to gateway" :str
-                                        :in [:ooapi-version]]
+   :validator-instance-name            ["Unique name for the validator service instance" :str
+                                        :default "shared-validator-service"
+                                        :in [:validator-instance-name]]
    :spider-timeout-millis              ["Maximum number of milliseconds before spider timeout." :int
                                         :default 3600000
                                         :in [:spider-timeout-millis]]})
@@ -85,14 +86,17 @@
   [[config errs]]
   (if errs
     [config errs]
-    (let [goose-conn-opts {:url (get-in config [:redis-conn :spec :uri])}]
+    (let [goose-conn-opts {:url (get-in config [:redis-conn :spec :uri])}
+          queue-id (get-in config [:validator-instance-name])]
       [(assoc config
               :goose-worker-opts (-> goose.worker/default-opts
-                                     (assoc :broker (redis.broker/new-consumer goose-conn-opts)))
+                                     (assoc :broker (redis.broker/new-consumer goose-conn-opts)
+                                            :queue queue-id))
               :goose-client-opts (-> goose.client/default-opts
                                      (assoc :retry-opts (assoc goose.retry/default-opts
                                                                :error-handler-fn-sym 'nl.surf.eduhub.validator.service.jobs.client/job-error-handler)
-                                            :broker (redis.broker/new-producer goose-conn-opts))))])))
+                                            :broker (redis.broker/new-producer goose-conn-opts)
+                                            :queue queue-id)))])))
 
 (defn load-config-from-env [env-map]
   (-> (reduce file-secret-loader-reducer env-map (keys opt-specs))

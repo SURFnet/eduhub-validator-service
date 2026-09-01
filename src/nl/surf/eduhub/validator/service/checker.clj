@@ -26,9 +26,9 @@
 
 ;; The endpoint checker from phase 1. This connects to an endpoint via the gateway and checks if it receives
 ;; a valid response.
-(defn check-endpoint [endpoint-id custom-path config]
+(defn check-endpoint [endpoint-id custom-path oeapi-version config]
   (try
-    (let [{:keys [status body]} (validate/check-endpoint endpoint-id custom-path config)]
+    (let [{:keys [status body]} (validate/check-endpoint endpoint-id custom-path oeapi-version config)]
       ;; If the client credentials for the validator are incorrect, the wrap-authentication
       ;; middleware has already returned 401 forbidden and execution doesn't get here.
       (handle-check-endpoint-response status body endpoint-id))

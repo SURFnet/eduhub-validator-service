@@ -29,7 +29,7 @@
   (with-redefs [http/request (fn [_]
                                (update gateway-response
                                        :body json/write-str))]
-    (checker/check-endpoint endpoint-id nil {:gateway-url "http://localhost"})))
+    (checker/check-endpoint endpoint-id nil nil {:gateway-url "http://localhost"})))
 
 (deftest test-validate-correct
   (is (= {:status status/ok :body {:valid true}}
@@ -59,9 +59,9 @@
 (deftest check-endpoint-forwards-path
   (let [captured (atom nil)
         endpoint-id "google.com"]
-    (with-redefs [validate/check-endpoint (fn [eid path _config]
+    (with-redefs [validate/check-endpoint (fn [eid path _oaepi-version _config]
                                             (reset! captured {:endpoint eid :path path})
                                             {:status status/ok
                                              :body   (json/write-str {:gateway {:endpoints {(keyword eid) {:responseCode status/ok}}}})})]
-      (checker/check-endpoint endpoint-id "/programs" {:gateway-url "http://localhost"})
+      (checker/check-endpoint endpoint-id "/programs" nil {:gateway-url "http://localhost"})
       (is (= {:endpoint endpoint-id :path "/programs"} @captured)))))
