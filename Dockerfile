@@ -3,7 +3,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-FROM clojure:temurin-21-tools-deps-1.12.5.1664 AS builder
+FROM clojure:temurin-21-tools-deps-1.12.6.1673 AS builder
 RUN apt-get -y update
 RUN apt-get install -y curl
 
