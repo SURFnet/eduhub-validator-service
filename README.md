@@ -11,22 +11,26 @@ Perform basic checks on whether the endpoint is up.
 Calls the endpoint with `endpointId` through the Eduhub gateway and
 reports if a successful response is received.
 
+The `oeapi-version` parameter is optional, default is "5".
+
 The gateway path defaults to `/courses` but can be customised with the
 `CHECK_ENDPOINT_PATH` environment variable. Provide a `path`
 query parameter to temporarily override the default, e.g.
-`GET /configstatus/{endpointId}?path=/programs`.
+`GET /configstatus/{endpointId}?path=/programs&oeapi-version=6`.
 
 On success, responds with a `200 OK` status
 
 On error, responds with a `502 Bad Gateway` status.
 
-`GET /configstatus/{endpointId}`
+`GET /configstatus/{endpointId}?oeapi-version=5`
 
 ### Validate endpoint
 
 Use the validator to validate the endpoint and generate a report.
 
 `POST /jobs/paths/{endpointId}?profile=ooapi`
+
+The oeapi version is part of the specified profile.
 
 ### Fetch Status
 
@@ -68,22 +72,21 @@ Delete the report and the associated status data from the Redis database.
 The service can be fully configured using environment variables:
 
 ```
-GATEWAY_URL                         https://gateway.test.surfeduhub.nl/
-GATEWAY_BASIC_AUTH_USER             Username for gateway
-GATEWAY_BASIC_AUTH_PASS             Password for gateway
+ALLOWED_CLIENT_IDS                  Comma separated list of allowed SurfCONEXT client ids.
+CHECK_ENDPOINT_PATH                 Default path used for config status checks
+GATEWAY_BASIC_AUTH_PASS             Basic auth password of gateway
+GATEWAY_BASIC_AUTH_USER             Basic auth username of gateway
+GATEWAY_URL                         URL of gateway
+JOB_STATUS_EXPIRY_SECONDS           Number of seconds before job status in Redis expires
+MAX_TOTAL_REQUESTS                  Maximum number of requests that validator is allowed to make before raising an error
+REDIS_URI                           URI to redis
+SERVER_PORT                         Starts the app server on this port
+SPIDER_TIMEOUT_MILLIS               Maximum number of milliseconds before spider timeout.
 SURF_CONEXT_CLIENT_ID               SurfCONEXT client id for validation service
 SURF_CONEXT_CLIENT_SECRET           SurfCONEXT client secret for validation service
 SURF_CONEXT_INTROSPECTION_ENDPOINT  SurfCONEXT introspection endpoint
-ALLOWED_CLIENT_IDS                  Comma separated list of allowed SurfCONEXT client ids.
-MAX_TOTAL_REQUESTS                  Maximum number of requests that validator is allowed to make before raising an error
-CHECK_ENDPOINT_PATH                 Default path used when checking `/configstatus/{endpointId}` (defaults to `/courses`).
-OOAPI_VERSION                       Ooapi version to pass through to gateway
-SERVER_PORT                         Starts the app server on this port
-REDIS_URI                           URI to redis
-VALIDATOR_INSTANCE_NAME             Unique name for the validator instance - needed when multiple validator services share a redis instance
-JOB_STATUS_EXPIRY_SECONDS           Number of seconds before job status in Redis expires
-SPIDER_TIMEOUT_MILLIS               Maximum number of milliseconds before spider timeout.
-VALIDATOR_SERVICE_ROOT_URL          The root url of the web endpoint, used to generate a url to a status view. This url is included in the json output after starting a validation job as "web-url".
+VALIDATOR_INSTANCE_NAME             Unique name for the validator service instance
+VALIDATOR_SERVICE_ROOT_URL          Root url for the web view; does not include path
 ```
 
 ### Secret files
