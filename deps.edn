@@ -1,38 +1,28 @@
 {:paths ["src" "test" "resources" "classes"]
- :deps  {org.clojure/clojure      {:mvn/version "1.12.5"}
+ :deps  {org.clojure/clojure      {:mvn/version "1.12.6"}
          org.clojure/core.memoize {:mvn/version "1.2.281"}
 
          org.clojure/tools.logging                   {:mvn/version "1.3.1"}
-         ch.qos.logback/logback-classic              {:mvn/version "1.6.3"}
+         ch.qos.logback/logback-classic              {:mvn/version "1.6.6"}
          ch.qos.logback.contrib/logback-json-classic {:mvn/version "0.1.5"}
          ch.qos.logback.contrib/logback-jackson      {:mvn/version "0.1.5"}
-         com.fasterxml.jackson.core/jackson-databind {:mvn/version "2.22.2"}
+         com.fasterxml.jackson.core/jackson-databind {:mvn/version "2.22.4"}
          cheshire/cheshire                           {:mvn/version "6.2.0"}
 
-         com.nilenso/goose    {:mvn/version "0.6.0"
-                               :exclusions  [com.rabbitmq/amqp-client]}
-         com.taoensso/carmine {:mvn/version "3.5.0"
-                               :exclusions [io.airlift/aircompressor]}
+         com.nilenso/goose        {:mvn/version "0.6.1"
+                                   :exclusions  [com.rabbitmq/amqp-client]}
+         com.taoensso/carmine     {:mvn/version "3.5.0"
+                                   :exclusions  [io.airlift/aircompressor]}
          ;; Fixes CVE-2025-67721
          io.airlift/aircompressor {:mvn/version "2.0.3"}
 
-         org.babashka/http-client {:mvn/version "0.4.24"}
+         org.babashka/http-client {:mvn/version "0.4.26"}
          org.babashka/json        {:mvn/version "0.1.6"}
 
          ring/ring-codec         {:mvn/version "1.3.0"}
-         ring/ring-core          {:mvn/version "1.15.5"}
+         ring/ring-core          {:mvn/version "1.15.6"}
          ring/ring-defaults      {:mvn/version "0.7.1"}
-         ring/ring-jetty-adapter {:mvn/version "1.15.5"
-                                  :exclusions  [org.eclipse.jetty/jetty-server
-                                                org.eclipse.jetty/jetty-unixdomain-server
-                                                org.eclipse.jetty.ee9/jetty-ee9-servlet
-                                                org.eclipse.jetty.ee9.websocket/jetty-ee9-websocket-jetty-server]}
-
-         ;; ring/ring-jetty-adapter-1.15.5 security override
-         org.eclipse.jetty/jetty-server                                   {:mvn/version "12.1.12"}
-         org.eclipse.jetty/jetty-unixdomain-server                        {:mvn/version "12.1.12"}
-         org.eclipse.jetty.ee9/jetty-ee9-servlet                          {:mvn/version "12.1.12"}
-         org.eclipse.jetty.ee9.websocket/jetty-ee9-websocket-jetty-server {:mvn/version "12.1.12"}
+         ring/ring-jetty-adapter {:mvn/version "1.15.6"}
 
          ring/ring-json                 {:mvn/version "0.5.1"}
          compojure/compojure            {:mvn/version "1.7.2"}
@@ -42,7 +32,7 @@
          nl.surfnet/eduhub-validator    {:git/url "https://github.com/SURFnet/eduhub-validator"
                                          :git/sha "a3d7b9a539c2df516afd111920c54a21ea5378a6"
                                          :git/tag "v1.1.1"}
-         nl.jomco/with-resources        {:mvn/version "0.1.2"}}
+         nl.jomco/with-resources        {:mvn/version "0.1.3"}}
  :aliases
  {:test {:extra-deps {lambdaisland/kaocha {:mvn/version "RELEASE"}}
          :main-opts  ["-m" "kaocha.runner"]}
@@ -50,16 +40,16 @@
   :lint {:extra-deps {clj-kondo/clj-kondo {:mvn/version "RELEASE"}}
          :main-opts  ["-m" "clj-kondo.main" "--lint" "src" "test"]}
 
-  :outdated {:replace-deps {com.github.liquidz/antq {:mvn/version "RELEASE"}}
-             :main-opts    ["-m" "antq.core" "--skip=github-action"]}
+  :antq {:replace-deps {com.github.liquidz/antq {:mvn/version "RELEASE"}}
+         :main-opts    ["-m" "antq.core" "--skip=github-action"]}
 
   :uberjar {:replace-deps  {uberdeps/uberdeps {:mvn/version "RELEASE"}}
             :replace-paths []
             :main-opts     ["-m" "uberdeps.uberjar"
                             "--main-class" "nl.surf.eduhub.validator.service.main"]}
   :watson  {:paths        []
-            :replace-deps {io.github.clj-holmes/clj-watson {:git/tag "v6.1.0"
-                                                            :git/sha "be98e4db74fb8927db4825cc73bbe2606e44e5e3"}
+            :replace-deps {io.github.clj-holmes/clj-watson {:git/tag "v6.2.0"
+                                                            :git/sha "c0dcdf323efb349baa9ec964298f725baccda73b"}
                            org.owasp/dependency-check-core {:mvn/version "RELEASE"}}
             :main-opts    ["-m" "clj-watson.cli"]}
 

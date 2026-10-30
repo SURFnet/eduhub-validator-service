@@ -26,7 +26,7 @@ test:
 	clojure -M:test
 
 outdated:
-	clojure -M:outdated
+	clojure -M:antq
 
 check: lint test
 
