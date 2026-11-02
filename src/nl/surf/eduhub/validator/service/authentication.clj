@@ -96,16 +96,14 @@
   the client-id gets added to the request as `:client-id` and the
   request is handled by `f`. If the authenticator returns `nil` or
   if the http status of the authenticator call is not successful, the
-  request is forbidden.
-
-  If no bearer token is provided, the request is executed without a client-id."
+  request is forbidden."
   ; auth looks like {:user client-id :pass client-secret}
-  [app introspection-endpoint auth allowed-client-id-set {:keys [auth-disabled]}]
+  [app introspection-endpoint auth allowed-client-id-set]
   (let [authenticator (memo/ttl (make-token-authenticator introspection-endpoint auth) :ttl/threshold 60000)] ; 1 minute
+
     (fn authentication [request]
       (let [client-id (some-> request bearer-token authenticator)]
-        (if (or auth-disabled
-                (allowed-client-id-set client-id))
+        (if (allowed-client-id-set client-id)
           (app request)
           {:body   (if client-id "Unknown client id" "No client-id found")
            :status http-status/forbidden})))))

@@ -19,9 +19,43 @@
 (ns nl.surf.eduhub.validator.service.test-helper
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [nl.jomco.http-status-codes :as http-status]
+            [cheshire.core :as json]
             [clojure.test :refer [is]]
             [clojure.pprint :refer [pprint]])
   (:import [java.io PushbackReader]))
+
+(def valid-token
+  (str "eyJraWQiOiJrZXlfMjAyMl8xMF8wNF8wMF8wMF8wMF8wMDEiLCJ0eXAiOiJK"
+       "V1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiJwbGF5Z3JvdW5kX2NsaWVudCI"
+       "sInN1YiI6InBsYXlncm91bmRfY2xpZW50IiwibmJmIjoxNjY0ODkyNTg0LCJ"
+       "pc3MiOiJodHRwczpcL1wvY29ubmVjdC50ZXN0LnN1cmZjb25leHQubmwiLCJ"
+       "leHAiOjE2NjU3NTY1ODQsImlhdCI6MTY2NDg5MjU4NCwianRpIjoiNTlkNGY"
+       "yZDQtZmRhOC00MTBjLWE2MzItY2QzMzllMTliNTQ2In0.nkQqZK02SamkNI2"
+       "ICDrE1LxN6kBBDOwQd5zU9BsPxNIfOwP1qnCwNQELo5xX0R2cJJJqCgmq8nw"
+       "BjZ4xNba4lTS8dii4Fmy-8u7fN427mx-_G-GoCGQSKQD6OdVKjDsRMJX4rHN"
+       "DSg5HhtDz5or-2Xp_H0Vi0mWMOBgQGjfbjLjJJZ1T0rlaZbq-_ZAatb2dFcr"
+       "WliqbFrous_fSPo4jrbPVHYunF-wZZoLZFlOaCyJM24A_3Mrv4JPw78WRnyu"
+       "ZG0H7aS2v_KLe5Xh2lUkSa0lkO_xP2uhQQ_69bnmF0RQiKe9vVDi7mhi0aGE"
+       "do2f-iJ8JQj4EwPzZkSvdJt569w"))
+
+(def allowed-client-id "mock-client")
+
+(def mock-introspection-count-calls (atom 0))
+
+;; Mock out the introspection endpoint. Pretend token is active if
+;; it's equal to `valid-token`, invalid otherwise.
+(defn mock-introspection
+  [{:keys [form-params]}]
+  (swap! mock-introspection-count-calls inc)
+  (let [valid? (= valid-token (:token form-params))]
+    {:status http-status/ok
+     :body   (json/encode
+              (cond-> {:active valid?}
+                valid?
+                (assoc :client_id allowed-client-id)))}))
+
+
 
 (defn validate-timestamp [m k]
   (let [ts (k m)]

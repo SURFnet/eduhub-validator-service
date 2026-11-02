@@ -4,17 +4,17 @@
             [clojure.test :refer [deftest is testing]]
             [goose.client :as c]
             [nl.jomco.http-status-codes :as http-status]
-            [nl.surf.eduhub.validator.service.jobs.status :as status]
-            [nl.surf.eduhub.validator.service.jobs.worker :as worker]
             [nl.surf.eduhub.validator.service.api :as api]
             [nl.surf.eduhub.validator.service.config :as config]
             [nl.surf.eduhub.validator.service.config-test :as config-test]
+            [nl.surf.eduhub.validator.service.jobs.status :as status]
+            [nl.surf.eduhub.validator.service.jobs.worker :as worker]
             [nl.surf.eduhub.validator.service.test-helper :as test-helper]))
 
 (def test-config
   (first (config/load-config-from-env config-test/default-env)))
 
-(def app (api/compose-app test-config :auth-disabled))
+(def app (api/compose-app test-config))
 
 (defn- make-status-call [uuid]
   (let [{:keys [status body]}
@@ -40,25 +40,36 @@
 (deftest test-queue
   (testing "initial call to api"
     ;; mock c/perform-async
-    (let [jobs-atom (atom [])
+    (let [jobs-atom   (atom [])
           status-atom (atom {})
-          dirname   "test/fixtures/validate_correct"
-          vcr       (test-helper/make-playbacker dirname)]
-      (with-redefs [c/perform-async (fn [_job-opts & args]
-                                      (swap! jobs-atom conj args))
-                    status/set-status-fields (fn [_ id status m _]
-                                               (swap! status-atom update id merge (assoc m
-                                                                                         (keyword (str status "-at")) "2025-01-01T01:01:01.001Z"
-                                                                                         :job-status status))
-                                               (prn status-atom))
-                    status/load-status (fn [_ id]
-                                         (get @status-atom id))]
+          dirname     "test/fixtures/validate_correct"
+          vcr         (test-helper/make-playbacker dirname)]
+      (with-redefs [http/request ;; NOTE: this function gets redef later too, be careful when reordering this code
+                    test-helper/mock-introspection
+
+                    c/perform-async
+                    (fn [_job-opts & args]
+                      (swap! jobs-atom conj args))
+
+                    status/set-status-fields
+                    (fn [_ id status m _]
+                      (swap! status-atom update id merge
+                             (assoc m
+                                    (keyword (str status "-at")) "2025-01-01T01:01:01.001Z"
+                                    :job-status status)))
+
+                    status/load-status
+                    (fn [_ id]
+                      (get @status-atom id))]
         ;; make endpoint call
-        (let [resp (app {:uri "/jobs/paths/google.com" :request-method :post})]
-          (is (= {:headers {"Content-Type" "application/json; charset=utf-8", "Content-Length" "153"}, :status 200}
-                 (select-keys resp [:headers :status])))
+        (let [req  {:request-method :post
+                    :uri            (str "/jobs/paths/" test-helper/allowed-client-id)
+                    :headers        {"authorization" (str "Bearer " test-helper/valid-token)}}
+              resp (app req)]
           ;; assert status OK
-          (is (= http-status/ok (:status resp)))
+          (is (= {:status  http-status/ok
+                  :headers {"Content-Type" "application/json; charset=utf-8", "Content-Length" "153"}}
+                 (select-keys resp [:headers :status])))
           ;; assert job queued
           (is (= 1 (count @jobs-atom)))
           ;; assert json response with uuid
@@ -66,14 +77,15 @@
             ;; assert job status pending
             (is (= job-status "pending"))
             ;; make http request to status
-            (is (= {:job-status "pending" :profile "ooapi" :endpoint-id "google.com"}
+            (is (= {:job-status "pending" :profile "ooapi" :endpoint-id test-helper/allowed-client-id}
                    (-> (make-status-call uuid)
                        (test-helper/validate-timestamp :pending-at))))
 
             ;; run the first job in the queue
             (testing "run worker"
               ;; mock http/request
-              (with-redefs [http/request (fn wrap-vcr [req] (vcr req))]
+              (with-redefs [http/request  ;; NOTE: this function gets redef on higher level too, be careful when reordering this code
+                            (fn wrap-vcr [req] (vcr req))]
                 ;; run worker
                 (let [[fname & args] (pop-queue! jobs-atom)]
                   (binding [worker/*config* test-config]
@@ -84,5 +96,5 @@
                                (test-helper/validate-timestamp :finished-at))]
 
                   ;; assert status response with status finished and html report
-                  (is (= {:job-status "finished" :profile "ooapi" :endpoint-id "google.com"}
+                  (is (= {:job-status "finished" :profile "ooapi" :endpoint-id test-helper/allowed-client-id}
                          (dissoc body :html-report))))))))))))

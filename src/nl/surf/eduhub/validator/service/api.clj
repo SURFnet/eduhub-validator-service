@@ -97,15 +97,14 @@
       (wrap-defaults api-defaults)))
 
 (defn private-routes [{:keys [introspection-endpoint-url introspection-basic-auth
-                              allowed-client-ids] :as config} auth-disabled]
-  (let [allowed-client-id-set (set (string/split allowed-client-ids #","))
-        auth-opts             {:auth-disabled (boolean auth-disabled)}]
+                              allowed-client-ids] :as config}]
+  (let [allowed-client-id-set (set (string/split allowed-client-ids #","))]
     (-> (compojure.core/routes
          (GET "/configstatus/:endpoint-id" [endpoint-id path oeapi-version]
            (checker/check-endpoint endpoint-id path (or oeapi-version "5") config))
          (POST "/jobs/paths/:endpoint-id" [endpoint-id profile]
             (jobs-client/enqueue-validation endpoint-id profile config)))
-        (auth/wrap-authentication introspection-endpoint-url introspection-basic-auth allowed-client-id-set auth-opts)
+        (auth/wrap-authentication introspection-endpoint-url introspection-basic-auth allowed-client-id-set)
         (wrap-json-response)
         (wrap-defaults api-defaults))))
 
@@ -144,11 +143,11 @@
             :headers {"content-type" "text/plain"}
             :body "Internal Server Error"}))))
 
-;; Compose the app from the routes and the wrappers. Authentication can be disabled for testing purposes.
-(defn compose-app [config auth-disabled]
+;; Compose the app from the routes and the wrappers.
+(defn compose-app [config]
   (-> (compojure.core/routes
        (public-routes config)
-       (private-routes config auth-disabled)
+       (private-routes config)
        (route/not-found "Not Found"))
       (wrap-log)
       (wrap-error-page)))

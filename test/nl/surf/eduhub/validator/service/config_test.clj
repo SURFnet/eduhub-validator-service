@@ -19,11 +19,12 @@
 (ns nl.surf.eduhub.validator.service.config-test
   (:require [clojure.test :refer [deftest is]]
             [nl.surf.eduhub.validator.service.config :as config]
+            [nl.surf.eduhub.validator.service.test-helper :as test-helper]
             [goose.brokers.redis.broker :as broker])
   (:import [clojure.lang ExceptionInfo]
            [java.io File]))
 
-(def default-env {:allowed-client-ids                 "default",
+(def default-env {:allowed-client-ids                 test-helper/allowed-client-id,
                   :gateway-basic-auth-user            "default",
                   :gateway-basic-auth-pass            "default",
                   :gateway-url                        "https://gateway.test.surfeduhub.nl/",
@@ -37,7 +38,7 @@
                   :spider-timeout-millis              "3600000"})
 
 (def default-expected-value
-  {:allowed-client-ids         "default",
+  {:allowed-client-ids         test-helper/allowed-client-id,
    :gateway-url                "https://gateway.test.surfeduhub.nl/",
    :check-endpoint-path        "/courses",
    :gateway-basic-auth         {:pass "default", :user "john200"},
