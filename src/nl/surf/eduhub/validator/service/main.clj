@@ -37,7 +37,7 @@
   [{:keys [server-port] :as config}]
   (let [parent-thread (Thread/currentThread)]
     (mk-system [worker (jobs.worker/mk-worker config)
-                web-app (api/compose-app config true)
+                web-app (api/compose-app config false)
                 jetty (run-jetty web-app
                                  {:port  server-port
                                   :join? false})
