@@ -7,7 +7,7 @@
          ch.qos.logback.contrib/logback-json-classic {:mvn/version "0.1.5"}
          ch.qos.logback.contrib/logback-jackson      {:mvn/version "0.1.5"}
          com.fasterxml.jackson.core/jackson-databind {:mvn/version "2.22.4"}
-         cheshire/cheshire                           {:mvn/version "6.2.0"}
+         cheshire/cheshire                           {:mvn/version "6.2.1"}
 
          com.nilenso/goose        {:mvn/version "0.6.1"
                                    :exclusions  [com.rabbitmq/amqp-client]}
